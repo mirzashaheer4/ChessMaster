@@ -1,0 +1,7 @@
+=== RUNNING TIMER AND CLOCK TESTS ===
+
+  ✅ [PASS] Initial clock allocation sets both times
+  ✅ [PASS] Moves correctly toggle the active clock and apply increments
+  ✅ [PASS] Timeout loss applied upon hitting zero
+
+

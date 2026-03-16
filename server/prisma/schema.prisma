@@ -1,0 +1,66 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(uuid())
+  username     String   @unique
+  email        String   @unique
+  passwordHash String
+  eloRating    Int      @default(1200)
+  createdAt    DateTime @default(now())
+
+  gamesAsWhite Game[]   @relation("GamesAsWhite")
+  gamesAsBlack Game[]   @relation("GamesAsBlack")
+  savedGames   Game[]   @relation("SavedByUser")
+}
+
+model Game {
+  id            String   @id @default(uuid())
+
+  // The user who saved/played this game (for single-player & history)
+  userId        String?
+  savedBy       User?    @relation("SavedByUser", fields: [userId], references: [id], onDelete: Cascade)
+
+  // For future PvP — optional
+  whitePlayerId String?
+  blackPlayerId String?
+  whitePlayer   User?    @relation("GamesAsWhite", fields: [whitePlayerId], references: [id], onDelete: SetNull)
+  blackPlayer   User?    @relation("GamesAsBlack", fields: [blackPlayerId], references: [id], onDelete: SetNull)
+
+  // Game data
+  status        String   @default("active")   // active, checkmate, draw, timeout, resign
+  result        String?                        // 1-0, 0-1, 1/2-1/2
+  pgn           String   @default("")
+  currentFen    String   @default("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
+  timeControl   String?                        // e.g., "180+2"
+
+  // Context for single-player games
+  mode          String?                        // ai, local, dev
+  difficulty    String?                        // easy, medium, hard, extreme, custom
+  opponentName  String?                        // "Stockfish 16", "Player 2"
+  playerColor   String?                        // white, black
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  moves         Move[]
+
+  @@index([userId])
+}
+
+model Move {
+  id         String   @id @default(uuid())
+  gameId     String
+  moveNumber Int
+  fen        String
+  notation   String
+  createdAt  DateTime @default(now())
+
+  game       Game     @relation(fields: [gameId], references: [id], onDelete: Cascade)
+}

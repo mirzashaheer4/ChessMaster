@@ -1,0 +1,67 @@
+/* App-specific styles */
+
+/* Ensure smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Selection styling */
+::selection {
+  background: rgba(232, 179, 75, 0.3);
+  color: white;
+}
+
+/* Focus styling */
+*:focus-visible {
+  outline: 2px solid #e8b34b;
+  outline-offset: 2px;
+}
+
+/* Button active states */
+button:active {
+  transform: scale(0.98);
+}
+
+/* Image optimization */
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Prevent text selection on decorative elements */
+.no-select {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* Hardware acceleration for animations */
+.will-change-transform {
+  will-change: transform;
+}
+
+.will-change-opacity {
+  will-change: opacity;
+}
+
+/* Mobile touch optimization */
+@media (hover: none) {
+  .hover-glow:hover {
+    transform: none;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  }
+  
+  .nav-link::after {
+    display: none;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .glass-card {
+    border: 2px solid rgba(255, 255, 255, 0.3);
+  }
+  
+  .btn-gold {
+    border: 2px solid #e8b34b;
+  }
+}
