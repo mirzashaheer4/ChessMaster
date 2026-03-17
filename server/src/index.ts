@@ -17,7 +17,10 @@ const allowedOrigins = [
 ];
 
 if (process.env.FRONTEND_URL) {
-  allowedOrigins.push(process.env.FRONTEND_URL);
+  const cleanUrl = process.env.FRONTEND_URL.endsWith('/') 
+    ? process.env.FRONTEND_URL.slice(0, -1) 
+    : process.env.FRONTEND_URL;
+  allowedOrigins.push(cleanUrl);
 }
 
 const io = new Server(server, {
