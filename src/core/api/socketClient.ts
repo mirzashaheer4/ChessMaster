@@ -8,7 +8,8 @@ import { useAuthStore } from '../store/auth';
 
 let socket: Socket | null = null;
 
-const SERVER_URL = import.meta.env.VITE_SERVER_URL || 'http://localhost:3001';
+const rawServerUrl = import.meta.env.VITE_SERVER_URL || 'http://localhost:3001';
+const SERVER_URL = rawServerUrl.endsWith('/') ? rawServerUrl.slice(0, -1) : rawServerUrl;
 
 export function getSocket(): Socket {
   if (socket && socket.connected) return socket;

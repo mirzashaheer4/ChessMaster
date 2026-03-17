@@ -1,6 +1,7 @@
 import { useAuthStore } from '../store/auth';
 
-const SERVER_URL = import.meta.env.VITE_SERVER_URL || '';
+const rawServerUrl = import.meta.env.VITE_SERVER_URL || '';
+const SERVER_URL = rawServerUrl.endsWith('/') ? rawServerUrl.slice(0, -1) : rawServerUrl;
 const API_BASE = `${SERVER_URL}/api`;
 
 /**
