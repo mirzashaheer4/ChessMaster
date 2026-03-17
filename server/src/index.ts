@@ -8,16 +8,21 @@ dotenv.config();
 
 const app = express();
 const server = http.createServer(app);
+const allowedOrigins = [
+  'http://localhost:5173', 
+  'http://localhost:5174', 
+  'http://localhost:5175', 
+  'http://127.0.0.1:5173', 
+  'http://127.0.0.1:5174'
+];
+
+if (process.env.FRONTEND_URL) {
+  allowedOrigins.push(process.env.FRONTEND_URL);
+}
+
 const io = new Server(server, {
   cors: {
-    origin: [
-      process.env.CLIENT_URL || 'http://localhost:5173',
-      'http://localhost:5173', 
-      'http://localhost:5174', 
-      'http://localhost:5175', 
-      'http://127.0.0.1:5173', 
-      'http://127.0.0.1:5174'
-    ],
+    origin: allowedOrigins,
     methods: ['GET', 'POST']
   }
 });
@@ -28,7 +33,10 @@ import authRoutes from './routes/authRoutes';
 import gameRoutes from './routes/gameRoutes';
 import { registerOnlineGameHandler } from './controllers/onlineGameHandler';
 
-app.use(cors());
+app.use(cors({
+  origin: allowedOrigins,
+  credentials: true
+}));
 app.use(express.json());
 
 // Routes

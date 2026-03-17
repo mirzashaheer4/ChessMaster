@@ -1,6 +1,7 @@
 import { useAuthStore } from '../store/auth';
 
-const API_BASE = '/api';
+const SERVER_URL = import.meta.env.VITE_SERVER_URL || '';
+const API_BASE = `${SERVER_URL}/api`;
 
 /**
  * Cloud Game Data — matches what the server returns
