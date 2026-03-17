@@ -24,7 +24,8 @@ export const AuthModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     setError('');
 
     try {
-      const endpoint = isLogin ? '/api/auth/login' : '/api/auth/register';
+      const SERVER_URL = import.meta.env.VITE_SERVER_URL || '';
+      const endpoint = isLogin ? `${SERVER_URL}/api/auth/login` : `${SERVER_URL}/api/auth/register`;
       const payload = isLogin ? { email, password } : { username, email, password };
       
       const response = await fetch(endpoint, {
