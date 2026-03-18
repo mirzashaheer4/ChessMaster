@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuthStore } from '../../core/store/auth';
+import { getApiServerUrl } from '../../core/api/urlUtils';
 
 export const AuthModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const [isLogin, setIsLogin] = useState(true);
@@ -24,8 +25,7 @@ export const AuthModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     setError('');
 
     try {
-      const rawServerUrl = import.meta.env.VITE_SERVER_URL || '';
-      const SERVER_URL = rawServerUrl.endsWith('/') ? rawServerUrl.slice(0, -1) : rawServerUrl;
+      const SERVER_URL = getApiServerUrl();
       const endpoint = isLogin ? `${SERVER_URL}/api/auth/login` : `${SERVER_URL}/api/auth/register`;
       const payload = isLogin ? { email, password } : { username, email, password };
 

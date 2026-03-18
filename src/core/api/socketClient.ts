@@ -1,5 +1,6 @@
 import { io, Socket } from 'socket.io-client';
 import { useAuthStore } from '../store/auth';
+import { getApiServerUrl } from './urlUtils';
 
 /**
  * Singleton Socket.io client manager for online multiplayer.
@@ -8,8 +9,7 @@ import { useAuthStore } from '../store/auth';
 
 let socket: Socket | null = null;
 
-const rawServerUrl = import.meta.env.VITE_SERVER_URL || 'http://localhost:3001';
-const SERVER_URL = rawServerUrl.endsWith('/') ? rawServerUrl.slice(0, -1) : rawServerUrl;
+const SERVER_URL = getApiServerUrl();
 
 export function getSocket(): Socket {
   if (socket && socket.connected) return socket;

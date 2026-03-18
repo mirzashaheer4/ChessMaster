@@ -52,6 +52,7 @@ model Game {
   moves         Move[]
 
   @@index([userId])
+  @@index([userId, createdAt(sort: Desc)]) // Composite index for sorted game history queries
 }
 
 model Move {

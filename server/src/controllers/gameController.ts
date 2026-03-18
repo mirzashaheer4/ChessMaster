@@ -81,27 +81,29 @@ export const getUserGames = async (req: AuthRequest, res: Response): Promise<voi
     const limit = Math.min(50, parseInt(req.query.limit as string) || 20); // Max 50 per page
     const skip = (page - 1) * limit;
 
-    const games = await prisma.game.findMany({
-      where: { userId },
-      orderBy: { createdAt: 'desc' },
-      skip,
-      take: limit,
-      select: {
-        id: true,
-        pgn: true,
-        result: true,
-        status: true,
-        mode: true,
-        difficulty: true,
-        opponentName: true,
-        playerColor: true,
-        timeControl: true,
-        currentFen: true,
-        createdAt: true,
-      }
-    });
-
-    const total = await prisma.game.count({ where: { userId } });
+    // Concurrent queries for better performance
+    const [games, total] = await Promise.all([
+      prisma.game.findMany({
+        where: { userId },
+        orderBy: { createdAt: 'desc' },
+        skip,
+        take: limit,
+        select: {
+          id: true,
+          pgn: true,
+          result: true,
+          status: true,
+          mode: true,
+          difficulty: true,
+          opponentName: true,
+          playerColor: true,
+          timeControl: true,
+          currentFen: true,
+          createdAt: true,
+        }
+      }),
+      prisma.game.count({ where: { userId } })
+    ]);
 
     res.json({
       games,

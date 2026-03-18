@@ -4,6 +4,7 @@ import { getSocket } from '../../api/socketClient';
 import { syncState } from '../storeUtils';
 import { useStandardStore } from '../../engine/storeStandard';
 import { useChess960Store } from '../../engine/storeChess960';
+import { removeAllSocketListeners } from '../socketEvents';
 
 export const createOnlineSlice: StateCreator<GameStore, [], [], OnlineSlice> = (set, get) => ({
   // Initial State
@@ -135,16 +136,7 @@ export const createOnlineSlice: StateCreator<GameStore, [], [], OnlineSlice> = (
     }
 
     // Remove old listeners to prevent duplicates
-    socket.removeAllListeners('queue_joined');
-    socket.removeAllListeners('game_matched');
-    socket.removeAllListeners('game_reconnected');
-    socket.removeAllListeners('move_made');
-    socket.removeAllListeners('move_error');
-    socket.removeAllListeners('game_over');
-    socket.removeAllListeners('draw_offered');
-    socket.removeAllListeners('draw_declined');
-    socket.removeAllListeners('opponent_disconnected');
-    socket.removeAllListeners('opponent_reconnected');
+    removeAllSocketListeners(socket);
 
     // ── Queue joined ──
     socket.on('queue_joined', () => {
@@ -319,16 +311,7 @@ export const createOnlineSlice: StateCreator<GameStore, [], [], OnlineSlice> = (
   cleanupSocketListeners: () => {
     try {
       const socket = getSocket();
-      socket.removeAllListeners('queue_joined');
-      socket.removeAllListeners('game_matched');
-      socket.removeAllListeners('game_reconnected');
-      socket.removeAllListeners('move_made');
-      socket.removeAllListeners('move_error');
-      socket.removeAllListeners('game_over');
-      socket.removeAllListeners('draw_offered');
-      socket.removeAllListeners('draw_declined');
-      socket.removeAllListeners('opponent_disconnected');
-      socket.removeAllListeners('opponent_reconnected');
+      removeAllSocketListeners(socket);
     } catch {
       // Socket may not exist
     }
