@@ -23,7 +23,7 @@ export const createOnlineSlice: StateCreator<GameStore, [], [], OnlineSlice> = (
       set({ onlineStatus: 'connecting', connectionError: null });
       const socket = getSocket();
 
-      // Init listeners first
+      // Init listeners (safe to call multiple times - old listeners removed first)
       get().initSocketListeners();
 
       const join = () => {
@@ -57,10 +57,9 @@ export const createOnlineSlice: StateCreator<GameStore, [], [], OnlineSlice> = (
 
     try {
       const socket = getSocket();
-      console.log(`[Online] Sending move to server:`, move);
       socket.emit('make_move', { roomId, ...move });
     } catch (err: any) {
-      console.error('[Online] Failed to send move:', err);
+      // Error silently caught
     }
   },
 
@@ -135,17 +134,17 @@ export const createOnlineSlice: StateCreator<GameStore, [], [], OnlineSlice> = (
       return;
     }
 
-    // Remove old listeners (idempotent)
-    socket.off('queue_joined');
-    socket.off('game_matched');
-    socket.off('game_reconnected');
-    socket.off('move_made');
-    socket.off('move_error');
-    socket.off('game_over');
-    socket.off('draw_offered');
-    socket.off('draw_declined');
-    socket.off('opponent_disconnected');
-    socket.off('opponent_reconnected');
+    // Remove old listeners to prevent duplicates
+    socket.removeAllListeners('queue_joined');
+    socket.removeAllListeners('game_matched');
+    socket.removeAllListeners('game_reconnected');
+    socket.removeAllListeners('move_made');
+    socket.removeAllListeners('move_error');
+    socket.removeAllListeners('game_over');
+    socket.removeAllListeners('draw_offered');
+    socket.removeAllListeners('draw_declined');
+    socket.removeAllListeners('opponent_disconnected');
+    socket.removeAllListeners('opponent_reconnected');
 
     // ── Queue joined ──
     socket.on('queue_joined', () => {
@@ -229,10 +228,6 @@ export const createOnlineSlice: StateCreator<GameStore, [], [], OnlineSlice> = (
       blackTime: number;
     }) => {
       const store = get();
-      
-      console.log(`[Online] Received move: ${data.from}-${data.to} (${data.san})`);
-      console.log(`[Online] Current board FEN: ${store.game.fen()}`);
-      console.log(`[Online] Current turn: ${store.game.turn()}`);
 
       const currentFen = store.game.fen().split(' ')[0];
       const incomingFen = data.fen.split(' ')[0];
@@ -249,9 +244,8 @@ export const createOnlineSlice: StateCreator<GameStore, [], [], OnlineSlice> = (
 
       // Apply the move locally, marking it as a network move so it doesn't echo back
       const result = store.makeMove({ from: data.from, to: data.to, promotion: data.promotion }, true);
-      
+
       if (!result) {
-        console.warn(`[Online] makeMove rejected incoming move! Syncing board state via FEN fallback.`);
         // Force sync board state if our local engine rejected it for some reason
         if (store.chessType === 'standard') {
           useStandardStore.getState().loadFen(data.fen);
@@ -269,8 +263,8 @@ export const createOnlineSlice: StateCreator<GameStore, [], [], OnlineSlice> = (
     });
 
     // ── Move error ──
-    socket.on('move_error', (data: { message: string }) => {
-      console.error('[Online] Move error:', data.message);
+    socket.on('move_error', () => {
+      // Move error silently handled
     });
 
     // ── Game over ──
@@ -325,16 +319,16 @@ export const createOnlineSlice: StateCreator<GameStore, [], [], OnlineSlice> = (
   cleanupSocketListeners: () => {
     try {
       const socket = getSocket();
-      socket.off('queue_joined');
-      socket.off('game_matched');
-      socket.off('game_reconnected');
-      socket.off('move_made');
-      socket.off('move_error');
-      socket.off('game_over');
-      socket.off('draw_offered');
-      socket.off('draw_declined');
-      socket.off('opponent_disconnected');
-      socket.off('opponent_reconnected');
+      socket.removeAllListeners('queue_joined');
+      socket.removeAllListeners('game_matched');
+      socket.removeAllListeners('game_reconnected');
+      socket.removeAllListeners('move_made');
+      socket.removeAllListeners('move_error');
+      socket.removeAllListeners('game_over');
+      socket.removeAllListeners('draw_offered');
+      socket.removeAllListeners('draw_declined');
+      socket.removeAllListeners('opponent_disconnected');
+      socket.removeAllListeners('opponent_reconnected');
     } catch {
       // Socket may not exist
     }

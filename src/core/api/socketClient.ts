@@ -33,19 +33,19 @@ export function getSocket(): Socket {
     reconnectionAttempts: 10,
     reconnectionDelay: 1000,
     reconnectionDelayMax: 5000,
-    timeout: 10000,
+    timeout: 3000, // 3 seconds for responsive chess game
   });
 
   socket.on('connect', () => {
-    console.log('[Socket] Connected:', socket?.id);
+    // Socket connected - no logging needed
   });
 
-  socket.on('disconnect', (reason) => {
-    console.log('[Socket] Disconnected:', reason);
+  socket.on('disconnect', () => {
+    // Socket disconnected - no logging needed
   });
 
-  socket.on('connect_error', (err) => {
-    console.error('[Socket] Connection error:', err.message);
+  socket.on('connect_error', () => {
+    // Connection error - handled by UI
   });
 
   return socket;

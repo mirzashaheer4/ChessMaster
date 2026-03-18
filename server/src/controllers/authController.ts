@@ -2,8 +2,7 @@ import { Request, Response } from 'express';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { prisma } from '../prisma';
-
-const JWT_SECRET = process.env.JWT_SECRET || 'fallback_secret';
+import { JWT_SECRET_SAFE } from '../config';
 
 export const register = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -36,7 +35,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
       }
     });
 
-    const token = jwt.sign({ userId: user.id, username: user.username }, JWT_SECRET, { expiresIn: '7d' });
+    const token = jwt.sign({ userId: user.id, username: user.username }, JWT_SECRET_SAFE, { expiresIn: '7d' });
 
     res.status(201).json({
       message: 'Registration successful',
@@ -45,7 +44,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
     });
   } catch (error: any) {
     console.error('Registration error:', error);
-    res.status(500).json({ error: 'Internal server error', details: error.message || error.toString() });
+    res.status(500).json({ error: 'Registration failed. Please try again later.' });
   }
 };
 
@@ -74,7 +73,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    const token = jwt.sign({ userId: user.id, username: user.username }, JWT_SECRET, { expiresIn: '7d' });
+    const token = jwt.sign({ userId: user.id, username: user.username }, JWT_SECRET_SAFE, { expiresIn: '7d' });
 
     res.json({
       message: 'Login successful',
@@ -83,7 +82,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     });
   } catch (error: any) {
     console.error('Login error:', error);
-    res.status(500).json({ error: 'Internal server error', details: error.message || error.toString() });
+    res.status(500).json({ error: 'Login failed. Please try again later.' });
   }
 };
 

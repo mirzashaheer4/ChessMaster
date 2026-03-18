@@ -60,7 +60,7 @@ export const saveGame = async (req: AuthRequest, res: Response): Promise<void> =
     });
   } catch (error: any) {
     console.error('Save game error:', error);
-    res.status(500).json({ error: 'Failed to save game', details: error.message });
+    res.status(500).json({ error: 'Failed to save game. Please try again.' });
   }
 };
 
@@ -76,9 +76,16 @@ export const getUserGames = async (req: AuthRequest, res: Response): Promise<voi
       return;
     }
 
+    // Pagination with security limits
+    const page = Math.max(1, parseInt(req.query.page as string) || 1);
+    const limit = Math.min(50, parseInt(req.query.limit as string) || 20); // Max 50 per page
+    const skip = (page - 1) * limit;
+
     const games = await prisma.game.findMany({
       where: { userId },
       orderBy: { createdAt: 'desc' },
+      skip,
+      take: limit,
       select: {
         id: true,
         pgn: true,
@@ -94,9 +101,19 @@ export const getUserGames = async (req: AuthRequest, res: Response): Promise<voi
       }
     });
 
-    res.json({ games });
+    const total = await prisma.game.count({ where: { userId } });
+
+    res.json({
+      games,
+      pagination: {
+        page,
+        limit,
+        total,
+        pages: Math.ceil(total / limit)
+      }
+    });
   } catch (error: any) {
     console.error('Fetch games error:', error);
-    res.status(500).json({ error: 'Failed to fetch games', details: error.message });
+    res.status(500).json({ error: 'Failed to fetch games. Please try again.' });
   }
 };

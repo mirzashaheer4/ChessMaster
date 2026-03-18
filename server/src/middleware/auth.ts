@@ -1,7 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
-
-const JWT_SECRET = process.env.JWT_SECRET || 'fallback_secret';
+import { JWT_SECRET_SAFE } from '../config';
 
 export interface AuthRequest extends Request {
   user?: {
@@ -19,7 +18,7 @@ export const authenticateToken = (req: AuthRequest, res: Response, next: NextFun
     return;
   }
 
-  jwt.verify(token, JWT_SECRET, (err, decoded) => {
+  jwt.verify(token, JWT_SECRET_SAFE, (err, decoded) => {
     if (err) {
       res.status(403).json({ error: 'Invalid or expired token' });
       return;

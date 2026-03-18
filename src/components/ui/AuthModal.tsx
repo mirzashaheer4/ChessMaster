@@ -28,17 +28,27 @@ export const AuthModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
       const SERVER_URL = rawServerUrl.endsWith('/') ? rawServerUrl.slice(0, -1) : rawServerUrl;
       const endpoint = isLogin ? `${SERVER_URL}/api/auth/login` : `${SERVER_URL}/api/auth/register`;
       const payload = isLogin ? { email, password } : { username, email, password };
-      
+
       const response = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       });
 
-      const data = await response.json();
+      let data;
+      try {
+        data = await response.json();
+      } catch {
+        throw new Error('Invalid server response. Please try again.');
+      }
 
       if (!response.ok) {
-        throw new Error(data.error || 'Authentication failed');
+        throw new Error(data.error || 'Authentication failed. Please try again.');
+      }
+
+      // Validate response structure
+      if (!data.token || !data.user || !data.user.id) {
+        throw new Error('Invalid authentication response.');
       }
 
       setAuth(data.token, data.user);
@@ -46,7 +56,11 @@ export const AuthModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
       useAuthStore.getState().fetchGames();
       onClose();
     } catch (err: any) {
-      setError(err.message);
+      if (err instanceof TypeError && err.message.includes('fetch')) {
+        setError('Network error. Please check your connection and try again.');
+      } else {
+        setError(err.message || 'An error occurred. Please try again.');
+      }
     }
   };
 

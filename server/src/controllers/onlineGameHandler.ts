@@ -1,8 +1,7 @@
 import { Server, Socket } from 'socket.io';
 import { Chess } from 'chess.js';
 import jwt from 'jsonwebtoken';
-
-const JWT_SECRET = process.env.JWT_SECRET || 'fallback_secret';
+import { JWT_SECRET_SAFE } from '../config';
 
 // ─── Types ───────────────────────────────────────────────────────────
 interface QueueEntry {
@@ -209,7 +208,6 @@ function createGameRoom(io: Server, p1: QueueEntry, p2: QueueEntry) {
 
   // Start the clock
   startClock(io, room);
-  console.log(`[Online] Game started: ${roomId} | ${whitePlayer.username} (W) vs ${blackPlayer.username} (B)`);
 }
 
 // ─── Socket Handler ──────────────────────────────────────────────────
@@ -222,7 +220,7 @@ export function registerOnlineGameHandler(io: Server) {
       return next(new Error('Authentication required'));
     }
     try {
-      const decoded = jwt.verify(token, JWT_SECRET) as { userId: string; username: string };
+      const decoded = jwt.verify(token, JWT_SECRET_SAFE) as { userId: string; username: string };
       (socket as any).user = decoded;
       next();
     } catch {
@@ -232,7 +230,6 @@ export function registerOnlineGameHandler(io: Server) {
 
   io.on('connection', (socket: Socket) => {
     const user = (socket as any).user as { userId: string; username: string };
-    console.log(`[Online] User connected: ${user.username} (${socket.id})`);
 
     // ── Check for reconnection to existing game ──
     for (const [roomId, room] of gameRooms) {
@@ -280,13 +277,32 @@ export function registerOnlineGameHandler(io: Server) {
         const opId = getOpponentSocketId(room, socket.id);
         if (opId) io.to(opId).emit('opponent_reconnected');
 
-        console.log(`[Online] ${user.username} reconnected to ${roomId}`);
         break;
       }
     }
 
     // ── Join matchmaking queue ──
     socket.on('join_queue', (data: { timeCategory: string; timeInitial: number; timeIncrement: number; elo?: number }) => {
+      // Validate time control values
+      if (!data.timeInitial || !data.timeCategory) {
+        socket.emit('queue_error', { message: 'Invalid time control' });
+        return;
+      }
+
+      const timeInitial = parseInt(data.timeInitial as any);
+      const timeIncrement = parseInt(data.timeIncrement as any) || 0;
+
+      // Security: Validate time ranges
+      if (timeInitial < 1 || timeInitial > 3600 || timeIncrement < 0 || timeIncrement > 180) {
+        socket.emit('queue_error', { message: 'Time control out of valid range' });
+        return;
+      }
+
+      if (!['bullet', 'blitz', 'rapid'].includes(data.timeCategory)) {
+        socket.emit('queue_error', { message: 'Invalid time category' });
+        return;
+      }
+
       // Remove from any existing queue
       matchmakingQueue.delete(socket.id);
 
@@ -296,13 +312,12 @@ export function registerOnlineGameHandler(io: Server) {
         username: user.username,
         elo: data.elo || 1200,
         timeCategory: data.timeCategory,
-        timeInitial: data.timeInitial,
-        timeIncrement: data.timeIncrement,
+        timeInitial,
+        timeIncrement,
       };
 
       matchmakingQueue.set(socket.id, entry);
       socket.emit('queue_joined', { position: matchmakingQueue.size });
-      console.log(`[Online] ${user.username} joined queue (${data.timeCategory} ${data.timeInitial}+${data.timeIncrement})`);
 
       // Try to match immediately
       tryMatch(io);
@@ -312,7 +327,6 @@ export function registerOnlineGameHandler(io: Server) {
     socket.on('leave_queue', () => {
       matchmakingQueue.delete(socket.id);
       socket.emit('queue_left');
-      console.log(`[Online] ${user.username} left queue`);
     });
 
     // ── Make a move ──
@@ -336,6 +350,24 @@ export function registerOnlineGameHandler(io: Server) {
         return;
       }
 
+      // Validate input format
+      if (!data.from || !data.to || typeof data.from !== 'string' || typeof data.to !== 'string') {
+        socket.emit('move_error', { message: 'Invalid move format' });
+        return;
+      }
+
+      // Validate square format (must be 2 chars like 'e2', 'e4')
+      if (!/^[a-h][1-8]$/.test(data.from) || !/^[a-h][1-8]$/.test(data.to)) {
+        socket.emit('move_error', { message: 'Invalid square notation' });
+        return;
+      }
+
+      // Validate promotion if provided
+      if (data.promotion && !['q', 'r', 'b', 'n'].includes(data.promotion)) {
+        socket.emit('move_error', { message: 'Invalid promotion piece' });
+        return;
+      }
+
       // Validate and make the move
       try {
         const move = room.chess.move({
@@ -345,14 +377,23 @@ export function registerOnlineGameHandler(io: Server) {
         });
 
         if (!move) {
-          socket.emit('move_error', { message: 'Invalid move' });
+          socket.emit('move_error', { message: 'Illegal move' });
+          return;
+        }
+
+        // Check time - ensure player had time to move
+        const now = Date.now();
+        const elapsed = now - room.lastMoveTime;
+        const playerTimeRemaining = color === 'white' ? room.whiteTime : room.blackTime;
+
+        if (playerTimeRemaining - elapsed <= 0) {
+          socket.emit('move_error', { message: 'Time expired' });
+          // Revert move
+          room.chess.undo();
           return;
         }
 
         // Update clock: grant increment to the player who just moved
-        const now = Date.now();
-        const elapsed = now - room.lastMoveTime;
-
         if (color === 'white') {
           room.whiteTime = Math.max(0, room.whiteTime - elapsed + room.timeIncrement);
         } else {
@@ -389,7 +430,7 @@ export function registerOnlineGameHandler(io: Server) {
         }
 
       } catch (err: any) {
-        socket.emit('move_error', { message: err.message || 'Invalid move' });
+        socket.emit('move_error', { message: 'Invalid move' });
       }
     });
 
@@ -403,7 +444,6 @@ export function registerOnlineGameHandler(io: Server) {
 
       const winner = color === 'white' ? 'black' : 'white';
       endGame(io, room, winner, 'resign');
-      console.log(`[Online] ${user.username} resigned in ${data.roomId}`);
     });
 
     // ── Draw offer ──
@@ -425,7 +465,6 @@ export function registerOnlineGameHandler(io: Server) {
       if (opId) {
         io.to(opId).emit('draw_offered', { by: color });
       }
-      console.log(`[Online] ${user.username} offered draw in ${data.roomId}`);
     });
 
     // ── Accept draw ──
@@ -443,7 +482,6 @@ export function registerOnlineGameHandler(io: Server) {
       }
 
       endGame(io, room, 'draw', 'agreement');
-      console.log(`[Online] Draw accepted in ${data.roomId}`);
     });
 
     // ── Decline draw ──
@@ -463,8 +501,6 @@ export function registerOnlineGameHandler(io: Server) {
 
     // ── Disconnect ──
     socket.on('disconnect', () => {
-      console.log(`[Online] User disconnected: ${user.username} (${socket.id})`);
-
       // Remove from queue
       matchmakingQueue.delete(socket.id);
 
@@ -488,7 +524,6 @@ export function registerOnlineGameHandler(io: Server) {
               if (room.status === 'playing' && room.disconnectedPlayer === color) {
                 const winner = color === 'white' ? 'black' : 'white';
                 endGame(io, room, winner, 'abandonment');
-                console.log(`[Online] ${user.username} forfeited by disconnection in ${roomId}`);
               }
             }, 30000);
           }
