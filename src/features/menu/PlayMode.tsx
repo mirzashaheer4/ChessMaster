@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { ArrowLeft, User, Bot, Swords, History, ChevronRight, Globe, Cpu } from 'lucide-react';
+import { ArrowLeft, User, Bot, Swords, History, ChevronRight, ChevronLeft, Globe, Cpu } from 'lucide-react';
 
 import { useNavigate } from 'react-router-dom';
 import { useGameStore } from '../../core/store/game';
@@ -61,12 +61,182 @@ const ParticleBackground = ({ theme = 'default', intensity = 1 }: { theme?: 'def
 
 import GameSetupModal from './ui/GameSetupModal';
 
+// ─── GAME MODES DATA ────────────────────────────────────────────
+const GAME_MODES = [
+  {
+    id: 'pvp',
+    title: 'Local Match',
+    subtitle: 'Human vs Human',
+    desc: 'Challenge a friend in a local multiplayer match. Face off on the same device and prove who is the true chess master.',
+    image: '/landing/pvp-kings.png',
+    icon: Swords,
+    actionIcon: User,
+    actionText: 'Start Local Match',
+    setupMode: 'local',
+    
+    // Theme colors & gradients
+    themeColor: '#60a5fa',
+    baseColor: '#e8b34b',
+    cardGradient: 'linear-gradient(135deg, rgba(30,58,138,0.3) 0%, rgba(59,130,246,0.2) 50%, rgba(239,68,68,0.2) 100%)',
+    cardBorder: 'rgba(59, 130, 246, 0.5)',
+    cardShadow: '0 0 60px rgba(59, 130, 246, 0.3), inset 0 0 60px rgba(59, 130, 246, 0.1)',
+    iconGradient: 'linear-gradient(135deg, rgba(59,130,246,0.3) 0%, rgba(239,68,68,0.3) 100%)',
+    iconShadow: '0 0 30px rgba(59,130,246,0.5)',
+    buttonGradient: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
+    buttonShadow: '0 0 30px rgba(59, 130, 246, 0.5)',
+    imageFilter: 'drop-shadow(0 0 20px rgba(59,130,246,0.5))',
+    imageHoverFilterFallback: 'none',
+    imageTransform: 'scale(1.1)',
+    
+    renderBgEffect: () => <div className="absolute inset-0 pointer-events-none" style={{ background: 'linear-gradient(90deg, rgba(59,130,246,0.2) 0%, transparent 50%, rgba(239,68,68,0.2) 100%)' }} />
+  },
+  {
+    id: 'ai',
+    title: 'Play vs AI',
+    subtitle: 'Challenge the Machine',
+    desc: 'Test your skills against our advanced AI. Choose from multiple difficulty levels and learn from every move.',
+    image: '/landing/ai-battle.png',
+    icon: Bot,
+    actionIcon: Bot,
+    actionText: 'Challenge AI',
+    setupMode: 'ai',
+    
+    themeColor: '#a78bfa',
+    baseColor: '#e8b34b',
+    cardGradient: 'linear-gradient(135deg, rgba(76,29,149,0.4) 0%, rgba(139,92,246,0.3) 50%, rgba(59,130,246,0.2) 100%)',
+    cardBorder: 'rgba(139, 92, 246, 0.5)',
+    cardShadow: '0 0 60px rgba(139, 92, 246, 0.4), inset 0 0 60px rgba(139, 92, 246, 0.1)',
+    iconGradient: 'linear-gradient(135deg, rgba(139,92,246,0.4) 0%, rgba(59,130,246,0.3) 100%)',
+    iconShadow: '0 0 30px rgba(139,92,246,0.5)',
+    buttonGradient: 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)',
+    buttonShadow: '0 0 30px rgba(139, 92, 246, 0.5)',
+    imageFilter: 'drop-shadow(0 0 30px rgba(139,92,246,0.6))',
+    imageHoverFilterFallback: 'none',
+    imageTransform: 'scale(1.1)',
+    
+    renderBgEffect: () => <div className="absolute inset-0 pointer-events-none opacity-30" style={{ backgroundImage: `linear-gradient(rgba(139,92,246,0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(139,92,246,0.3) 1px, transparent 1px)`, backgroundSize: '40px 40px', animation: 'grid-move 20s linear infinite' }} />
+  },
+  {
+    id: 'online',
+    title: 'Play Online',
+    subtitle: 'Global PVP Matchmaking',
+    desc: 'Compete against players globally in real-time. Rise up the leaderboards and prove you are the best.',
+    image: '/landing/pvp-kings.png',
+    icon: Globe,
+    actionIcon: Globe,
+    actionText: 'Online Match',
+    setupMode: 'online',
+    
+    themeColor: '#34d399',
+    baseColor: '#e8b34b',
+    cardGradient: 'linear-gradient(135deg, rgba(6,78,59,0.4) 0%, rgba(4,120,87,0.3) 50%, rgba(16,185,129,0.2) 100%)',
+    cardBorder: 'rgba(16, 185, 129, 0.5)',
+    cardShadow: '0 0 60px rgba(16, 185, 129, 0.4), inset 0 0 60px rgba(16, 185, 129, 0.1)',
+    iconGradient: 'linear-gradient(135deg, rgba(16,185,129,0.4) 0%, rgba(5,150,105,0.3) 100%)',
+    iconShadow: '0 0 30px rgba(16,185,129,0.5)',
+    buttonGradient: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+    buttonShadow: '0 0 30px rgba(16, 185, 129, 0.5)',
+    imageFilter: 'drop-shadow(0 0 30px rgba(16,185,129,0.6)) hue-rotate(90deg)',
+    imageHoverFilterFallback: 'hue-rotate(60deg)',
+    imageTransform: 'scale(1.1)',
+    
+    renderBgEffect: () => <div className="absolute inset-0 pointer-events-none opacity-20" style={{ backgroundImage: `radial-gradient(circle at center, rgba(16,185,129,1) 0%, transparent 2px)`, backgroundSize: '20px 20px', animation: 'pulse-glow 4s infinite' }} />
+  },
+  {
+    id: 'dev',
+    title: 'Beat the Dev',
+    subtitle: 'Dev',
+    desc: 'Think you\'ve got what it takes? Face off against the ultimate challenge. The creator awaits your best moves.',
+    image: '/landing/ai-battle.png',
+    icon: Cpu,
+    actionIcon: Cpu,
+    actionText: 'Challenge Dev',
+    setupMode: 'dev',
+    
+    themeColor: '#fca5a5',
+    baseColor: '#e8b34b',
+    cardGradient: 'linear-gradient(135deg, rgba(153,27,27,0.4) 0%, rgba(220,38,38,0.3) 50%, rgba(239,68,68,0.2) 100%)',
+    cardBorder: 'rgba(239, 68, 68, 0.5)',
+    cardShadow: '0 0 60px rgba(239, 68, 68, 0.4), inset 0 0 60px rgba(239, 68, 68, 0.1)',
+    iconGradient: 'linear-gradient(135deg, rgba(239,68,68,0.4) 0%, rgba(185,28,28,0.3) 100%)',
+    iconShadow: '0 0 30px rgba(239,68,68,0.5)',
+    buttonGradient: 'linear-gradient(135deg, #ef4444 0%, #b91c1c 100%)',
+    buttonShadow: '0 0 30px rgba(239, 68, 68, 0.5)',
+    imageFilter: 'drop-shadow(0 0 30px rgba(239,68,68,0.6)) hue-rotate(-60deg)',
+    imageHoverFilterFallback: 'hue-rotate(-40deg)',
+    imageTransform: 'scale(1.1)',
+    
+    renderBgEffect: () => null
+  }
+];
+
+// ─── CARD COMPONENT ───────────────────────────────────────────────
+const GameModeCard = ({ mode, isActive, isFaded, onClick, onMouseEnter, onMouseLeave }: any) => {
+  return (
+    <div
+      className={`relative group cursor-pointer transition-all duration-700 h-full ${
+        isFaded ? 'opacity-40 scale-[0.98]' : 'opacity-100 scale-100'
+      }`}
+      onClick={onClick}
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
+    >
+      <div 
+        className="relative overflow-hidden rounded-3xl p-6 xl:p-8 h-full min-h-[400px] flex flex-col"
+        style={{
+          backgroundImage: isActive ? mode.cardGradient : 'none',
+          backgroundColor: isActive ? '#0a0a0f' : 'rgba(21, 21, 21, 0.95)',
+          backdropFilter: 'blur(20px)',
+          border: isActive ? `2px solid ${mode.cardBorder}` : '1px solid rgba(255, 255, 255, 0.08)',
+          boxShadow: isActive ? mode.cardShadow : '0 8px 32px rgba(0, 0, 0, 0.3)',
+          transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
+        }}
+      >
+        {isActive && mode.renderBgEffect?.()}
+        
+        <div className="relative z-10 flex flex-col h-full pointer-events-none">
+          <div className="w-16 h-16 rounded-2xl flex items-center justify-center mb-6 transition-all duration-500"
+            style={{ background: isActive ? mode.iconGradient : 'rgba(232,179,75,0.1)', boxShadow: isActive ? mode.iconShadow : 'none' }}>
+            <mode.icon className="w-8 h-8 transition-colors duration-500" style={{ color: isActive ? mode.themeColor : mode.baseColor }} />
+          </div>
+          <h3 className="text-2xl md:text-3xl font-bold font-['Montserrat'] mb-2">{mode.title}</h3>
+          <p className="text-lg mb-4 transition-colors duration-500 flex items-center gap-2" style={{ color: isActive ? mode.themeColor : mode.baseColor }}>
+            {mode.subtitle}
+          </p>
+          <p className="text-gray-400 text-sm leading-relaxed mb-6 flex-1">{mode.desc}</p>
+          <div className="relative h-32 md:h-40 mt-auto">
+            <img src={mode.image} alt={mode.title} className="absolute inset-0 w-full h-full object-contain transition-all duration-700 pointer-events-none"
+              style={{ transform: isActive ? mode.imageTransform : 'scale(1)', filter: isActive ? mode.imageFilter : mode.imageHoverFilterFallback }} />
+          </div>
+          <button className="mt-6 w-full py-4 rounded-xl font-semibold flex items-center justify-center gap-2 transition-all duration-500 pointer-events-auto"
+            style={{ background: isActive ? mode.buttonGradient : 'rgba(255, 255, 255, 0.05)', color: isActive ? 'white' : '#9ca3af', boxShadow: isActive ? mode.buttonShadow : 'none' }}>
+            <mode.actionIcon className="w-5 h-5" /> {mode.actionText} <ChevronRight className="w-4 h-4" />
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 export default function PlayMode() {
   const [hoveredMode, setHoveredMode] = useState<'none' | 'pvp' | 'ai' | 'online' | 'dev'>('none');
   const [setupMode, setSetupMode] = useState<'local' | 'dev' | 'online' | null>(null);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const containerRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
+
+  // Carousel specific state
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth < 768 : false);
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+  const [touchEnd, setTouchEnd] = useState<number | null>(null);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    handleResize(); // initial set
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const handleStartLocal = (settings: any) => {
     useGameStore.getState().setMode('local');
@@ -91,15 +261,21 @@ export default function PlayMode() {
     useGameStore.getState().setMode('online');
     useGameStore.getState().setTimeControl(tc);
     useGameStore.getState().setChessType('standard');
-    // Join matchmaking queue — the game will start via socket events
     useGameStore.getState().joinQueue(tc.category, tc.initial, tc.increment);
     navigate('/game/online');
+  };
+
+  const handleCardAction = (modeId: string) => {
+    if (modeId === 'ai') navigate('/difficulty');
+    else if (modeId === 'pvp') setSetupMode('local');
+    else if (modeId === 'online') setSetupMode('online');
+    else if (modeId === 'dev') setSetupMode('dev');
   };
 
   // Parallax mouse tracking
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
-      if (containerRef.current) {
+      if (!isMobile && containerRef.current) {
         const rect = containerRef.current.getBoundingClientRect();
         setMousePos({
           x: (e.clientX - rect.left - rect.width / 2) / 50,
@@ -110,25 +286,23 @@ export default function PlayMode() {
 
     window.addEventListener('mousemove', handleMouseMove, { passive: true });
     return () => window.removeEventListener('mousemove', handleMouseMove);
-  }, []);
+  }, [isMobile]);
+
+  // Compute the currently active theme mode key based on mobile or desktop interaction
+  const activeThemeModeId = isMobile ? GAME_MODES[activeIndex].id : (hoveredMode !== 'none' ? hoveredMode : 'none');
 
   const getBackgroundGradient = () => {
-    switch (hoveredMode) {
-      case 'pvp':
-        return 'linear-gradient(135deg, #0a0a0a 0%, #1a1a3e 25%, #1e1b4b 50%, #312e81 75%, #0a0a0a 100%)';
-      case 'ai':
-        return 'linear-gradient(135deg, #0a0a0a 0%, #1e1b4b 25%, #4c1d95 50%, #7c3aed 75%, #0a0a0a 100%)';
-      case 'online':
-        return 'linear-gradient(135deg, #0a0a0a 0%, #064e3b 25%, #065f46 50%, #047857 75%, #0a0a0a 100%)';
-      case 'dev':
-        return 'linear-gradient(135deg, #0a0a0a 0%, #450a0a 25%, #7f1d1d 50%, #991b1b 75%, #0a0a0a 100%)';
-      default:
-        return 'linear-gradient(135deg, #0a0a0a 0%, #0f172a 25%, #151515 50%, #0f172a 75%, #0a0a0a 100%)';
+    switch (activeThemeModeId) {
+      case 'pvp': return 'linear-gradient(135deg, #0a0a0a 0%, #1a1a3e 25%, #1e1b4b 50%, #312e81 75%, #0a0a0a 100%)';
+      case 'ai': return 'linear-gradient(135deg, #0a0a0a 0%, #1e1b4b 25%, #4c1d95 50%, #7c3aed 75%, #0a0a0a 100%)';
+      case 'online': return 'linear-gradient(135deg, #0a0a0a 0%, #064e3b 25%, #065f46 50%, #047857 75%, #0a0a0a 100%)';
+      case 'dev': return 'linear-gradient(135deg, #0a0a0a 0%, #450a0a 25%, #7f1d1d 50%, #991b1b 75%, #0a0a0a 100%)';
+      default: return 'linear-gradient(135deg, #0a0a0a 0%, #0f172a 25%, #151515 50%, #0f172a 75%, #0a0a0a 100%)';
     }
   };
 
   const getGlowColor = () => {
-    switch (hoveredMode) {
+    switch (activeThemeModeId) {
       case 'pvp': return 'rgba(59, 130, 246, 0.3)';
       case 'ai': return 'rgba(139, 92, 246, 0.3)';
       case 'online': return 'rgba(16, 185, 129, 0.3)';
@@ -137,12 +311,29 @@ export default function PlayMode() {
     }
   };
 
-  const isFaded = (mode: 'pvp' | 'ai' | 'online' | 'dev') => hoveredMode !== 'none' && hoveredMode !== mode;
+  const isFaded = (modeId: string) => !isMobile && hoveredMode !== 'none' && hoveredMode !== modeId;
+
+  // Touch handlers for mobile
+  const minSwipeDistance = 50;
+  const onTouchStart = (e: React.TouchEvent) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+  const onTouchMove = (e: React.TouchEvent) => setTouchEnd(e.targetTouches[0].clientX);
+  const onTouchEndEvent = () => {
+    if (!touchStart || !touchEnd) return;
+    const distance = touchStart - touchEnd;
+    if (distance > minSwipeDistance) nextSlide();
+    else if (distance < -minSwipeDistance) prevSlide();
+  };
+
+  const nextSlide = () => setActiveIndex((prev) => (prev === GAME_MODES.length - 1 ? 0 : prev + 1));
+  const prevSlide = () => setActiveIndex((prev) => (prev === 0 ? GAME_MODES.length - 1 : prev - 1));
 
   return (
     <div 
       ref={containerRef}
-      className="min-h-screen relative overflow-y-auto"
+      className={`min-h-screen relative ${isMobile ? 'overflow-hidden' : 'overflow-y-auto'}`}
       style={{
         background: getBackgroundGradient(),
         transition: 'background 0.8s cubic-bezier(0.4, 0, 0.2, 1)',
@@ -152,13 +343,13 @@ export default function PlayMode() {
       <div 
         className="fixed inset-0 pointer-events-none transition-all duration-1000"
         style={{
-          background: `radial-gradient(ellipse at ${50 + mousePos.x}% ${50 + mousePos.y}%, ${getGlowColor()} 0%, transparent 60%)`,
+          background: isMobile ? `radial-gradient(ellipse at 50% 50%, ${getGlowColor()} 0%, transparent 70%)` : `radial-gradient(ellipse at ${50 + mousePos.x}% ${50 + mousePos.y}%, ${getGlowColor()} 0%, transparent 60%)`,
         }}
       />
 
       {/* Theme-specific Particles */}
       <div className="fixed inset-0 pointer-events-none">
-        <ParticleBackground theme={hoveredMode === 'none' ? 'default' : hoveredMode} intensity={hoveredMode === 'none' ? 1 : 1.5} />
+        <ParticleBackground theme={activeThemeModeId as 'default'|'pvp'|'ai'|'online'|'dev'} intensity={activeThemeModeId === 'none' ? 1 : 1.5} />
       </div>
 
       {/* Floating Pieces with Parallax */}
@@ -169,7 +360,7 @@ export default function PlayMode() {
           top: '10%', 
           left: '5%', 
           animationDelay: '0s',
-          transform: `translate(${mousePos.x * -2}px, ${mousePos.y * -2}px)`,
+          transform: isMobile ? 'none' : `translate(${mousePos.x * -2}px, ${mousePos.y * -2}px)`,
           transition: 'transform 0.3s ease-out',
         }}
       />
@@ -180,27 +371,27 @@ export default function PlayMode() {
           top: '70%', 
           right: '8%', 
           animationDelay: '1s',
-          transform: `translate(${mousePos.x * 1.5}px, ${mousePos.y * 1.5}px)`,
+          transform: isMobile ? 'none' : `translate(${mousePos.x * 1.5}px, ${mousePos.y * 1.5}px)`,
           transition: 'transform 0.3s ease-out',
         }}
         animationClass="animate-float-reverse"
       />
       
       {/* Scan Line Effect for AI/Dev Mode */}
-      {(hoveredMode === 'ai' || hoveredMode === 'dev') && (
+      {(activeThemeModeId === 'ai' || activeThemeModeId === 'dev') && (
         <div 
           className="fixed inset-0 pointer-events-none overflow-hidden"
           style={{
-            background: `linear-gradient(to bottom, transparent 0%, ${hoveredMode === 'dev' ? 'rgba(239,68,68,0.1)' : 'rgba(139, 92, 246, 0.1)'} 50%, transparent 100%)`,
+            background: `linear-gradient(to bottom, transparent 0%, ${activeThemeModeId === 'dev' ? 'rgba(239,68,68,0.1)' : 'rgba(139, 92, 246, 0.1)'} 50%, transparent 100%)`,
             animation: 'scan-line 3s linear infinite',
           }}
         />
       )}
 
       {/* Content */}
-      <div className="relative z-10 min-h-screen flex flex-col pt-24 pb-12 px-6">
+      <div className="relative z-10 min-h-screen flex flex-col pt-16 md:pt-24 pb-12 px-6">
         {/* Top bar with back and history */}
-        <div className="max-w-7xl mx-auto w-full mb-8 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto w-full mb-6 md:mb-8 flex items-center justify-between">
           <button 
             onClick={() => navigate('/dashboard')}
             className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors duration-300 group cursor-pointer"
@@ -219,187 +410,126 @@ export default function PlayMode() {
         </div>
 
         {/* Header */}
-        <div className="text-center mb-12">
-          <span className="inline-block px-4 py-1.5 rounded-full bg-[#e8b34b]/10 border border-[#e8b34b]/30 text-[#e8b34b] text-xs font-semibold tracking-wider uppercase mb-4">
-            Select Game Mode
-          </span>
-          <h1 className="text-4xl md:text-6xl font-bold font-['Montserrat']">
+        <div className="text-center mb-6 md:mb-12">
+          {!isMobile && (
+            <span className="inline-block px-4 py-1.5 rounded-full bg-[#e8b34b]/10 border border-[#e8b34b]/30 text-[#e8b34b] text-xs font-semibold tracking-wider uppercase mb-4">
+              Select Game Mode
+            </span>
+          )}
+          <h1 className="text-3xl md:text-6xl font-bold font-['Montserrat']">
             Choose Your <span className="text-gold-gradient">Battle</span>
           </h1>
+          {isMobile && (
+             <div className="mt-6 text-[#34d399] tracking-[0.2em] text-[10px] font-bold uppercase pointer-events-none opacity-80" style={{ color: GAME_MODES[activeIndex].themeColor }}>
+               Swipe to Rotate
+             </div>
+          )}
         </div>
 
-        {/* Mode Selection Cards (4 Columns) */}
-        <div className="flex-1 flex items-center justify-center w-full px-4 sm:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 xl:gap-8 max-w-[1600px] w-full pb-20">
-            
-            {/* PVP Mode Card */}
-            <div
-              className={`relative group cursor-pointer transition-all duration-700 ${
-                isFaded('pvp') ? 'opacity-40 scale-[0.98]' : 'opacity-100 scale-100'
-              }`}
-              onClick={() => setSetupMode('local')}
-              onMouseEnter={() => setHoveredMode('pvp')}
-              onMouseLeave={() => setHoveredMode('none')}
-            >
-              <div 
-                className="relative overflow-hidden rounded-3xl p-6 xl:p-8 h-full min-h-[400px] flex flex-col"
-                style={{
-                  background: hoveredMode === 'pvp' ? 'linear-gradient(135deg, rgba(30,58,138,0.3) 0%, rgba(59,130,246,0.2) 50%, rgba(239,68,68,0.2) 100%)' : 'rgba(21, 21, 21, 0.6)',
-                  backdropFilter: 'blur(20px)',
-                  border: hoveredMode === 'pvp' ? '2px solid rgba(59, 130, 246, 0.5)' : '1px solid rgba(255, 255, 255, 0.08)',
-                  boxShadow: hoveredMode === 'pvp' ? '0 0 60px rgba(59, 130, 246, 0.3), inset 0 0 60px rgba(59, 130, 246, 0.1)' : '0 8px 32px rgba(0, 0, 0, 0.3)',
-                  transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
-                }}
-              >
-                {hoveredMode === 'pvp' && <div className="absolute inset-0 pointer-events-none" style={{ background: 'linear-gradient(90deg, rgba(59,130,246,0.2) 0%, transparent 50%, rgba(239,68,68,0.2) 100%)' }} />}
+        {/* Mode Selection Area */}
+        <div className="flex-1 flex items-center justify-center w-full px-0 sm:px-8">
+          
+          {/* Desktop Grid Layout */}
+          <div className="hidden md:grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 xl:gap-8 max-w-[1600px] w-full pb-20">
+            {GAME_MODES.map((mode) => (
+              <GameModeCard
+                key={mode.id}
+                mode={mode}
+                isActive={hoveredMode === mode.id}
+                isFaded={isFaded(mode.id)}
+                onClick={() => handleCardAction(mode.id)}
+                onMouseEnter={() => setHoveredMode(mode.id as any)}
+                onMouseLeave={() => setHoveredMode('none')}
+              />
+            ))}
+          </div>
+
+          {/* Mobile Carousel Layout */}
+          <div 
+            className="md:hidden relative w-full h-[520px] flex items-center justify-center -mx-6 px-4"
+            onTouchStart={onTouchStart}
+            onTouchMove={onTouchMove}
+            onTouchEnd={onTouchEndEvent}
+          >
+            {/* Left Arrow */}
+            <button onClick={prevSlide} className="absolute left-2 z-30 p-2 rounded-full bg-black/40 text-white/70 hover:text-white pointer-events-auto backdrop-blur-md border border-white/10 active:scale-90 transition-transform">
+              <ChevronLeft className="w-6 h-6" />
+            </button>
+
+            <div className="relative w-full h-full flex items-center justify-center" style={{ perspective: '1200px' }}>
+              {GAME_MODES.map((mode, index) => {
+                let offset = index - activeIndex;
+                if (offset < -1) offset += GAME_MODES.length;
+                if (offset > 1) offset -= GAME_MODES.length;
                 
-                <div className="relative z-10 flex flex-col h-full">
-                  <div className="w-16 h-16 rounded-2xl flex items-center justify-center mb-6 transition-all duration-500"
-                    style={{ background: hoveredMode === 'pvp' ? 'linear-gradient(135deg, rgba(59,130,246,0.3) 0%, rgba(239,68,68,0.3) 100%)' : 'rgba(232,179,75,0.1)', boxShadow: hoveredMode === 'pvp' ? '0 0 30px rgba(59,130,246,0.5)' : 'none' }}>
-                    <Swords className="w-8 h-8 transition-colors duration-500" style={{ color: hoveredMode === 'pvp' ? '#60a5fa' : '#e8b34b' }} />
-                  </div>
-                  <h3 className="text-2xl md:text-3xl font-bold font-['Montserrat'] mb-2">Local Match</h3>
-                  <p className="text-lg mb-4 transition-colors duration-500" style={{ color: hoveredMode === 'pvp' ? '#60a5fa' : '#e8b34b' }}>Human vs Human</p>
-                  <p className="text-gray-400 text-sm leading-relaxed mb-6 flex-1">Challenge a friend in a local multiplayer match. Face off on the same device and prove who is the true chess master.</p>
-                  <div className="relative h-32 md:h-40 mt-auto">
-                    <img src="/landing/pvp-kings.png" alt="PVP Battle" className="absolute inset-0 w-full h-full object-contain transition-all duration-700"
-                      style={{ transform: hoveredMode === 'pvp' ? 'scale(1.1)' : 'scale(1)', filter: hoveredMode === 'pvp' ? 'drop-shadow(0 0 20px rgba(59,130,246,0.5))' : 'none' }} />
-                  </div>
-                  <button className="mt-6 w-full py-4 rounded-xl font-semibold flex items-center justify-center gap-2 transition-all duration-500 cursor-pointer"
-                    style={{ background: hoveredMode === 'pvp' ? 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)' : 'rgba(255, 255, 255, 0.05)', color: hoveredMode === 'pvp' ? 'white' : '#9ca3af', boxShadow: hoveredMode === 'pvp' ? '0 0 30px rgba(59, 130, 246, 0.5)' : 'none' }}>
-                    <User className="w-5 h-5" /> Start Local Match <ChevronRight className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            {/* AI Mode Card */}
-            <div 
-                className={`relative group cursor-pointer transition-all duration-700 ${isFaded('ai') ? 'opacity-40 scale-[0.98]' : 'opacity-100 scale-100'}`}
-                onClick={() => navigate('/difficulty')}
-              onMouseEnter={() => setHoveredMode('ai')}
-              onMouseLeave={() => setHoveredMode('none')}
-            >
-              <div 
-                className="relative overflow-hidden rounded-3xl p-6 xl:p-8 h-full min-h-[400px] flex flex-col"
-                style={{
-                  background: hoveredMode === 'ai' ? 'linear-gradient(135deg, rgba(76,29,149,0.4) 0%, rgba(139,92,246,0.3) 50%, rgba(59,130,246,0.2) 100%)' : 'rgba(21, 21, 21, 0.6)',
-                  backdropFilter: 'blur(20px)',
-                  border: hoveredMode === 'ai' ? '2px solid rgba(139, 92, 246, 0.5)' : '1px solid rgba(255, 255, 255, 0.08)',
-                  boxShadow: hoveredMode === 'ai' ? '0 0 60px rgba(139, 92, 246, 0.4), inset 0 0 60px rgba(139, 92, 246, 0.1)' : '0 8px 32px rgba(0, 0, 0, 0.3)',
-                  transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
-                }}
-              >
-                {hoveredMode === 'ai' && (
-                  <div className="absolute inset-0 pointer-events-none opacity-30" style={{ backgroundImage: `linear-gradient(rgba(139,92,246,0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(139,92,246,0.3) 1px, transparent 1px)`, backgroundSize: '40px 40px', animation: 'grid-move 20s linear infinite' }} />
-                )}
+                const isCenter = offset === 0;
+                const isLeft = offset === -1;
+                const isRight = offset === 1;
+                const isVisible = isCenter || isLeft || isRight;
                 
-                <div className="relative z-10 flex flex-col h-full">
-                  <div className="w-16 h-16 rounded-2xl flex items-center justify-center mb-6 transition-all duration-500"
-                    style={{ background: hoveredMode === 'ai' ? 'linear-gradient(135deg, rgba(139,92,246,0.4) 0%, rgba(59,130,246,0.3) 100%)' : 'rgba(232,179,75,0.1)', boxShadow: hoveredMode === 'ai' ? '0 0 30px rgba(139,92,246,0.5)' : 'none' }}>
-                    <Bot className="w-8 h-8 transition-colors duration-500" style={{ color: hoveredMode === 'ai' ? '#a78bfa' : '#e8b34b' }} />
-                  </div>
-                  <h3 className="text-2xl md:text-3xl font-bold font-['Montserrat'] mb-2">Play vs AI</h3>
-                  <p className="text-lg mb-4 transition-colors duration-500" style={{ color: hoveredMode === 'ai' ? '#a78bfa' : '#e8b34b' }}>Challenge the Machine</p>
-                  <p className="text-gray-400 text-sm leading-relaxed mb-6 flex-1">Test your skills against our advanced AI. Choose from multiple difficulty levels and learn from every move.</p>
-                  <div className="relative h-32 md:h-40 mt-auto">
-                    <img src="/landing/ai-battle.png" alt="AI Battle" className="absolute inset-0 w-full h-full object-contain transition-all duration-700"
-                      style={{ transform: hoveredMode === 'ai' ? 'scale(1.1)' : 'scale(1)', filter: hoveredMode === 'ai' ? 'drop-shadow(0 0 30px rgba(139,92,246,0.6))' : 'none' }} />
-                  </div>
-                  <button className="mt-6 w-full py-4 rounded-xl font-semibold flex items-center justify-center gap-2 transition-all duration-500 cursor-pointer"
-                    style={{ background: hoveredMode === 'ai' ? 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)' : 'rgba(255, 255, 255, 0.05)', color: hoveredMode === 'ai' ? 'white' : '#9ca3af', boxShadow: hoveredMode === 'ai' ? '0 0 30px rgba(139, 92, 246, 0.5)' : 'none' }}>
-                    <Bot className="w-5 h-5" /> Challenge AI <ChevronRight className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            {/* PVP Online Card */}
-            <div
-              className={`relative group cursor-pointer transition-all duration-700 ${
-                isFaded('online') ? 'opacity-40 scale-[0.98]' : 'opacity-100 scale-100'
-              }`}
-              onClick={() => setSetupMode('online')}
-              onMouseEnter={() => setHoveredMode('online')}
-              onMouseLeave={() => setHoveredMode('none')}
-            >
-              <div 
-                className="relative overflow-hidden rounded-3xl p-6 xl:p-8 h-full min-h-[400px] flex flex-col"
-                style={{
-                  background: hoveredMode === 'online' ? 'linear-gradient(135deg, rgba(6,78,59,0.4) 0%, rgba(4,120,87,0.3) 50%, rgba(16,185,129,0.2) 100%)' : 'rgba(21, 21, 21, 0.6)',
-                  backdropFilter: 'blur(20px)',
-                  border: hoveredMode === 'online' ? '2px solid rgba(16, 185, 129, 0.5)' : '1px solid rgba(255, 255, 255, 0.08)',
-                  boxShadow: hoveredMode === 'online' ? '0 0 60px rgba(16, 185, 129, 0.4), inset 0 0 60px rgba(16, 185, 129, 0.1)' : '0 8px 32px rgba(0, 0, 0, 0.3)',
-                  transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
-                }}
-              >
-                {hoveredMode === 'online' && (
-                  <div className="absolute inset-0 pointer-events-none opacity-20" style={{ backgroundImage: `radial-gradient(circle at center, rgba(16,185,129,1) 0%, transparent 2px)`, backgroundSize: '20px 20px', animation: 'pulse-glow 4s infinite' }} />
-                )}
+                let transform = '';
+                let opacity = 0;
+                let zIndex = 0;
+                let filter = 'none';
                 
-                <div className="relative z-10 flex flex-col h-full">
-                  <div className="w-16 h-16 rounded-2xl flex items-center justify-center mb-6 transition-all duration-500"
-                    style={{ background: hoveredMode === 'online' ? 'linear-gradient(135deg, rgba(16,185,129,0.4) 0%, rgba(5,150,105,0.3) 100%)' : 'rgba(232,179,75,0.1)', boxShadow: hoveredMode === 'online' ? '0 0 30px rgba(16,185,129,0.5)' : 'none' }}>
-                    <Globe className="w-8 h-8 transition-colors duration-500" style={{ color: hoveredMode === 'online' ? '#34d399' : '#e8b34b' }} />
+                if (isCenter) {
+                  transform = 'translateX(0) scale(1) translateZ(0)';
+                  opacity = 1;
+                  zIndex = 20;
+                  filter = 'brightness(1)';
+                } else if (isLeft) {
+                  transform = 'translateX(-22%) scale(0.85) translateZ(-50px)';
+                  opacity = 0.5;
+                  zIndex = 10;
+                  filter = 'brightness(0.5)';
+                } else if (isRight) {
+                  transform = 'translateX(22%) scale(0.85) translateZ(-50px)';
+                  opacity = 0.5;
+                  zIndex = 10;
+                  filter = 'brightness(0.5)';
+                }
+                
+                return (
+                  <div 
+                    key={mode.id}
+                    className="absolute w-[85%] max-w-[340px] h-full transition-all duration-500 ease-[cubic-bezier(0.25,0.8,0.25,1)]"
+                    style={{ 
+                      transform, 
+                      opacity, 
+                      zIndex, 
+                      filter,
+                      visibility: isVisible ? 'visible' : 'hidden' 
+                    }}
+                    onClick={() => {
+                      if (isLeft) prevSlide();
+                      else if (isRight) nextSlide();
+                      else handleCardAction(mode.id);
+                    }}
+                  >
+                    <GameModeCard
+                      mode={mode}
+                      isActive={isCenter}
+                      isFaded={false}
+                      onClick={undefined}
+                      onMouseEnter={undefined}
+                      onMouseLeave={undefined}
+                    />
                   </div>
-                  <div className="flex justify-between items-center mb-2">
-                    <h3 className="text-2xl md:text-3xl font-bold font-['Montserrat']">Play Online</h3>
-                  </div>
-                  <p className="text-lg mb-4 transition-colors duration-500" style={{ color: hoveredMode === 'online' ? '#34d399' : '#e8b34b' }}>Global PVP Matchmaking</p>
-                  <p className="text-gray-400 text-sm leading-relaxed mb-6 flex-1">Compete against players globally in real-time. Rise up the leaderboards and prove you are the best.</p>
-                  <div className="relative h-32 md:h-40 mt-auto">
-                    <img src="/landing/pvp-kings.png" alt="Online PVP" className="absolute inset-0 w-full h-full object-contain transition-all duration-700"
-                      style={{ transform: hoveredMode === 'online' ? 'scale(1.1)' : 'scale(1)', filter: hoveredMode === 'online' ? 'drop-shadow(0 0 30px rgba(16,185,129,0.6)) hue-rotate(90deg)' : 'hue-rotate(60deg)' }} />
-                  </div>
-                  <button className="mt-6 w-full py-4 rounded-xl font-semibold flex items-center justify-center gap-2 transition-all duration-500 cursor-pointer"
-                    style={{ background: hoveredMode === 'online' ? 'linear-gradient(135deg, #10b981 0%, #059669 100%)' : 'rgba(255, 255, 255, 0.05)', color: hoveredMode === 'online' ? 'white' : '#9ca3af', boxShadow: hoveredMode === 'online' ? '0 0 30px rgba(16, 185, 129, 0.5)' : 'none' }}>
-                    <Globe className="w-5 h-5" /> Online Match <ChevronRight className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
+                )
+              })}
             </div>
 
-            {/* Beat the Dev Card */}
-            <div
-              className={`relative group cursor-pointer transition-all duration-700 ${
-                isFaded('dev') ? 'opacity-40 scale-[0.98]' : 'opacity-100 scale-100'
-              }`}
-              onClick={() => setSetupMode('dev')}
-              onMouseEnter={() => setHoveredMode('dev')}
-              onMouseLeave={() => setHoveredMode('none')}
-            >
-              <div 
-                className="relative overflow-hidden rounded-3xl p-6 xl:p-8 h-full min-h-[400px] flex flex-col"
-                style={{
-                  background: hoveredMode === 'dev' ? 'linear-gradient(135deg, rgba(153,27,27,0.4) 0%, rgba(220,38,38,0.3) 50%, rgba(239,68,68,0.2) 100%)' : 'rgba(21, 21, 21, 0.6)',
-                  backdropFilter: 'blur(20px)',
-                  border: hoveredMode === 'dev' ? '2px solid rgba(239, 68, 68, 0.5)' : '1px solid rgba(255, 255, 255, 0.08)',
-                  boxShadow: hoveredMode === 'dev' ? '0 0 60px rgba(239, 68, 68, 0.4), inset 0 0 60px rgba(239, 68, 68, 0.1)' : '0 8px 32px rgba(0, 0, 0, 0.3)',
-                  transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
-                }}
-              >
-                <div className="relative z-10 flex flex-col h-full">
-                  <div className="w-16 h-16 rounded-2xl flex items-center justify-center mb-6 transition-all duration-500"
-                    style={{ background: hoveredMode === 'dev' ? 'linear-gradient(135deg, rgba(239,68,68,0.4) 0%, rgba(185,28,28,0.3) 100%)' : 'rgba(232,179,75,0.1)', boxShadow: hoveredMode === 'dev' ? '0 0 30px rgba(239,68,68,0.5)' : 'none' }}>
-                    <Cpu className="w-8 h-8 transition-colors duration-500" style={{ color: hoveredMode === 'dev' ? '#fca5a5' : '#e8b34b' }} />
-                  </div>
-                  <h3 className="text-2xl md:text-3xl font-bold font-['Montserrat'] mb-2">Beat the Dev</h3>
-                  <p className="text-lg mb-4 transition-colors duration-500 flex items-center gap-2" style={{ color: hoveredMode === 'dev' ? '#fca5a5' : '#e8b34b' }}>
-                    Dev
-                  </p>
-                  <p className="text-gray-400 text-sm leading-relaxed mb-6 flex-1">Think you've got what it takes? Face off against the ultimate challenge. The creator awaits your best moves.</p>
-                  <div className="relative h-32 md:h-40 mt-auto">
-                    <img src="/landing/ai-battle.png" alt="Beat the Dev" className="absolute inset-0 w-full h-full object-contain transition-all duration-700"
-                      style={{ transform: hoveredMode === 'dev' ? 'scale(1.1)' : 'scale(1)', filter: hoveredMode === 'dev' ? 'drop-shadow(0 0 30px rgba(239,68,68,0.6)) hue-rotate(-60deg)' : 'hue-rotate(-40deg)' }} />
-                  </div>
-                  <button className="mt-6 w-full py-4 rounded-xl font-semibold flex items-center justify-center gap-2 transition-all duration-500 cursor-pointer"
-                    style={{ background: hoveredMode === 'dev' ? 'linear-gradient(135deg, #ef4444 0%, #b91c1c 100%)' : 'rgba(255, 255, 255, 0.05)', color: hoveredMode === 'dev' ? 'white' : '#9ca3af', boxShadow: hoveredMode === 'dev' ? '0 0 30px rgba(239, 68, 68, 0.5)' : 'none' }}>
-                    <Cpu className="w-5 h-5" /> Challenge Dev <ChevronRight className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
-            </div>
+            {/* Right Arrow */}
+            <button onClick={nextSlide} className="absolute right-2 z-30 p-2 rounded-full bg-black/40 text-white/70 hover:text-white pointer-events-auto backdrop-blur-md border border-white/10 active:scale-90 transition-transform">
+              <ChevronRight className="w-6 h-6" />
+            </button>
 
+            {/* Drag Hint */}
+            <div className="absolute -bottom-8 left-0 right-0 flex justify-center mt-2 pointer-events-none">
+               <div className="text-[10px] text-white/30 tracking-widest font-mono select-none flex items-center gap-2">
+                 <span>&lt;</span> DRAG <span>&gt;</span>
+               </div>
+            </div>
           </div>
         </div>
       </div>
