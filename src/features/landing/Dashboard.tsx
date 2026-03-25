@@ -10,6 +10,8 @@ import {
   ChevronRight,
   Zap,
   Dices,
+  Menu,
+  X,
 } from 'lucide-react';
 
 import { useAuthStore } from '../../core/store/auth';
@@ -62,6 +64,7 @@ const ParticleBackground = () => {
 // ─── Navbar ───────────────────────────────────────────────────────
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { user, logout } = useAuthStore();
   const navigate = useNavigate();
 
@@ -71,17 +74,27 @@ const Navbar = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  const navLinks = [
+    { label: 'Home', href: '#home' },
+    { label: 'Features', href: '#features' },
+    { label: 'Leaderboard', href: '#leaderboard' },
+    { label: 'About', action: () => navigate('/about') },
+  ];
+
   return (
     <nav 
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
-        scrolled ? 'glass-navbar py-3' : 'bg-transparent py-5'
+        scrolled || mobileMenuOpen ? 'glass-navbar py-3' : 'bg-transparent py-5'
       }`}
     >
       <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
         {/* Logo */}
         <div 
           className="flex items-center gap-3 group cursor-pointer"
-          onClick={() => navigate('/')}
+          onClick={() => {
+            navigate('/');
+            setMobileMenuOpen(false);
+          }}
         >
           <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-[#e8b34b] to-[#d4a03d] flex items-center justify-center transition-transform duration-300 group-hover:rotate-12">
             <Crown className="w-6 h-6 text-[#0a0a0a]" />
@@ -91,14 +104,9 @@ const Navbar = () => {
           </span>
         </div>
 
-        {/* Navigation Links */}
+        {/* Desktop Navigation Links */}
         <div className="hidden md:flex items-center gap-8">
-          {[
-            { label: 'Home', href: '#home' },
-            { label: 'Features', href: '#features' },
-            { label: 'Leaderboard', href: '#leaderboard' },
-            { label: 'About', action: () => navigate('/about') },
-          ].map((item) => (
+          {navLinks.map((item) => (
             <a
               key={item.label}
               href={item.href || '#'}
@@ -126,6 +134,61 @@ const Navbar = () => {
               <button 
                 onClick={() => window.dispatchEvent(new Event('open-login'))}
                 className="px-4 py-2 rounded-lg bg-[#e8b34b] hover:bg-[#d4a03d] text-[#0a0a0a] text-sm font-bold transition-colors cursor-pointer"
+              >
+                Sign In
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Mobile Menu Button */}
+        <button 
+          className="md:hidden p-2 text-gray-300 hover:text-white transition-colors"
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+        >
+          {mobileMenuOpen ? <X className="w-7 h-7" /> : <Menu className="w-7 h-7" />}
+        </button>
+      </div>
+
+      {/* Mobile Menu Overlay */}
+      <div 
+        className={`md:hidden absolute top-full left-0 right-0 glass-navbar border-t border-white/5 transition-all duration-300 overflow-hidden ${
+          mobileMenuOpen ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'
+        }`}
+      >
+        <div className="px-6 py-8 flex flex-col gap-6">
+          {navLinks.map((item) => (
+            <a
+              key={item.label}
+              href={item.href || '#'}
+              onClick={(e) => {
+                setMobileMenuOpen(false);
+                if (item.action) { e.preventDefault(); item.action(); }
+              }}
+              className="text-lg font-medium text-gray-300 hover:text-[#e8b34b] transition-colors"
+            >
+              {item.label}
+            </a>
+          ))}
+          <div className="pt-6 mt-2 border-t border-white/10">
+            {user ? (
+              <button 
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  logout();
+                  navigate('/');
+                }}
+                className="w-full py-4 rounded-xl bg-white/5 border border-white/10 text-white text-lg font-bold transition-colors hover:bg-white/10"
+              >
+                Log out
+              </button>
+            ) : (
+              <button 
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  window.dispatchEvent(new Event('open-login'));
+                }}
+                className="w-full py-4 rounded-xl bg-[#e8b34b] text-[#0a0a0a] text-lg font-bold shadow-[0_0_20px_rgba(232,179,75,0.2)]"
               >
                 Sign In
               </button>

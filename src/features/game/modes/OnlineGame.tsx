@@ -170,7 +170,7 @@ const OnlineGame = () => {
   // ── Main Game View ──
   return (
     <div
-      className="min-h-screen relative flex flex-col overflow-hidden"
+      className="min-h-screen relative flex flex-col md:flex-row overflow-hidden"
       style={{
         background: 'linear-gradient(135deg, #0a0a0a 0%, #0d1117 40%, #0a0a0a 100%)',
       }}
@@ -207,7 +207,7 @@ const OnlineGame = () => {
       )}
 
       {/* Main 3-column layout */}
-      <div className="flex-1 flex items-center justify-center gap-4 md:gap-6 px-4 md:px-8 py-4 min-h-0">
+      <div className="flex-1 flex flex-col md:flex-row items-center justify-center gap-4 md:gap-6 px-4 md:px-8 py-4 min-h-0 w-full">
 
         {/* LEFT PANEL — Opponent Info + Controls */}
         <div className="hidden md:flex flex-col w-64 gap-4 relative z-10">
@@ -306,7 +306,7 @@ const OnlineGame = () => {
 
           {/* Board + Desktop Clock Container */}
           <div className="flex items-stretch justify-center gap-3 md:gap-4 w-full mt-2 md:mt-0">
-            <div className="flex flex-col justify-center min-w-0" style={{ width: 'min(95vh, calc(100% - 110px))' }}>
+            <div className="flex flex-col justify-center min-w-0 w-full max-w-[min(100vw-32px,65vh)] md:w-[min(95vh,calc(100%-110px))]">
               <div className="w-full aspect-square relative">
                 <Board />
               </div>
@@ -390,6 +390,61 @@ const OnlineGame = () => {
             </button>
           </div>
         </div>
+
+        {/* Mobile Action Buttons (Under Board) */}
+        <div className="md:hidden flex flex-col gap-2 w-full mt-4">
+            <button onClick={flipBoard} className="w-full py-3 flex items-center justify-center gap-2 rounded-xl text-gray-400 hover:text-[#e8b34b] transition-all duration-200 glass-panel" style={{ border: '1px solid rgba(232, 179, 75, 0.1)' }}>
+              <RotateCw className="w-4 h-4" /> <span className="text-xs uppercase tracking-wider font-medium">Flip Board</span>
+            </button>
+
+            {gameStatus === 'active' && (
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  onClick={offerDraw}
+                  disabled={drawOfferedBy === onlineColor}
+                  className={`w-full py-3 flex items-center justify-center gap-2 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all duration-200 glass-panel ${
+                    drawOfferedBy === onlineColor ? 'text-gray-600 opacity-50' : 'text-gray-400 hover:text-emerald-400'
+                  }`}
+                  style={{ border: '1px solid rgba(16, 185, 129, 0.2)' }}
+                >
+                  <Handshake className="w-4 h-4" />
+                  {drawOfferedBy === onlineColor ? 'Offered' : 'Draw'}
+                </button>
+
+                <button
+                  onClick={() => setShowResignConfirm(true)}
+                  className="w-full py-3 flex items-center justify-center gap-2 rounded-xl text-red-400/70 hover:text-red-400 hover:bg-red-400/5 text-xs uppercase tracking-wider transition-all duration-200 font-semibold glass-panel"
+                  style={{ border: '1px solid rgba(220, 38, 38, 0.2)' }}
+                >
+                  <Flag className="w-3.5 h-3.5" /> Resign
+                </button>
+              </div>
+            )}
+            {gameStatus !== 'active' && (
+              <button onClick={() => { resetOnline(); navigate('/play'); }} className="w-full py-3 rounded-xl btn-gold text-sm font-semibold flex items-center justify-center gap-2">
+                <Swords className="w-4 h-4" /> Play Again
+              </button>
+            )}
+             {/* Navigation Mobile — always visible */}
+             <div className="flex justify-center items-center gap-2 glass-panel p-2 rounded-xl mt-2">
+               <button onClick={handleGoToStart} disabled={!canGoStart} className={navBtnClass(canGoStart)} title="First Move">
+                 <ChevronsLeft className="w-4 h-4" />
+               </button>
+               <button onClick={handlePrev} disabled={!canPrev} className={navBtnClass(canPrev)} title="Previous">
+                 <ChevronLeft className="w-4 h-4" />
+               </button>
+               <button onClick={handleNext} disabled={!canNext} className={navBtnClass(canNext)} title="Next">
+                 <ChevronRight className="w-4 h-4" />
+               </button>
+               <button onClick={handleGoToEnd} disabled={!canGoLive} className={navBtnClass(canGoLive)} title="Latest">
+                 <ChevronsRight className="w-4 h-4" />
+               </button>
+            </div>
+            <button onClick={handleBack} className="w-full mt-2 text-gray-500 hover:text-[#e8b34b] text-xs uppercase tracking-wider transition-colors py-3 font-semibold">
+              Exit to Menu
+            </button>
+        </div>
+
       </div>
 
       {/* Resign Confirmation Modal */}

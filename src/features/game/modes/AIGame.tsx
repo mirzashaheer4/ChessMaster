@@ -474,7 +474,7 @@ const AIGame = () => {
         {/* Board + Desktop Clock Container */}
         <div className="flex items-stretch justify-center gap-3 md:gap-4 w-full mt-2 md:mt-0">
           {/* Board Wrapper */}
-          <div className="flex flex-col justify-center min-w-0" style={{ width: 'min(95vh, calc(100% - 110px))' }}>
+          <div className="flex flex-col justify-center min-w-0 w-full max-w-[min(100vw-32px,65vh)] md:w-[min(95vh,calc(100%-110px))]">
             <div className="w-full aspect-square relative">
               <Board />
             </div>
@@ -533,12 +533,17 @@ const AIGame = () => {
 
       </div>
 
-      {/* Flip Board Button - Mobile (Repositioned) */}
+      {/* Flip Board Button - Mobile (Repositioned to mobile controls) */}
       <button
         onClick={flipBoard}
-        className="absolute top-20 left-4 md:hidden p-2 glass-card rounded-full text-gray-400 hover:text-[#e8b34b] z-20"
+        className="md:hidden flex items-center justify-center gap-2 w-full py-3 mb-4 rounded-xl text-gray-400 hover:text-[#e8b34b] transition-all duration-200 glass-panel"
+        style={{
+          border: '1px solid rgba(232, 179, 75, 0.1)',
+        }}
+        title="Flip Board"
       >
         <RotateCw className="w-4 h-4" />
+        <span className="text-xs uppercase tracking-wider font-medium">Flip Board</span>
       </button>
 
       {/* Resign Confirmation Modal */}
