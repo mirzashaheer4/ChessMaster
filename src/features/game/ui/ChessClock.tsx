@@ -3,6 +3,7 @@ import { useGameStore } from '../../../core/store/game';
 
 interface ChessClockProps {
   className?: string;
+  mode?: 'both' | 'top' | 'bottom';
 }
 
 // Format milliseconds to MM:SS
@@ -16,7 +17,7 @@ const formatTime = (ms: number): string => {
   return `${minutes}:${seconds.toString().padStart(2, '0')}`;
 };
 
-const ChessClock: React.FC<ChessClockProps> = ({ className = '' }) => {
+const ChessClock: React.FC<ChessClockProps> = ({ className = '', mode = 'both' }) => {
   const { 
     whiteTime, 
     blackTime, 
@@ -73,16 +74,19 @@ const ChessClock: React.FC<ChessClockProps> = ({ className = '' }) => {
 
   return (
     <div className={`flex flex-col gap-2 ${className}`}>
-      {showBlackOnTop ? (
-        <>
+      {mode !== 'bottom' && (
+        showBlackOnTop ? (
           <ClockDisplay time={blackTime} isActive={!isWhiteTurn && clockRunning} isLow={blackLow} label="Black" />
+        ) : (
           <ClockDisplay time={whiteTime} isActive={isWhiteTurn && clockRunning} isLow={whiteLow} label="White" />
-        </>
-      ) : (
-        <>
+        )
+      )}
+      {mode !== 'top' && (
+        showBlackOnTop ? (
           <ClockDisplay time={whiteTime} isActive={isWhiteTurn && clockRunning} isLow={whiteLow} label="White" />
+        ) : (
           <ClockDisplay time={blackTime} isActive={!isWhiteTurn && clockRunning} isLow={blackLow} label="Black" />
-        </>
+        )
       )}
     </div>
   );

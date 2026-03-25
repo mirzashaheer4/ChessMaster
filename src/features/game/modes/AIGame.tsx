@@ -53,6 +53,7 @@ const AIGame = () => {
   const [showEvalBar, setShowEvalBar] = useState(true);
   const [timeoutHandled, setTimeoutHandled] = useState(false);
   const [showThemeSelection, setShowThemeSelection] = useState(false);
+  const [showMobileOptions, setShowMobileOptions] = useState(false);
 
   // Close resign confirm on Escape
   useEffect(() => {
@@ -69,11 +70,16 @@ const AIGame = () => {
   // Move list scrolling
   const moveListRef = useRef<HTMLDivElement>(null);
   const moveListEndRef = useRef<HTMLDivElement>(null);
+  const mobileMoveListRef = useRef<HTMLDivElement>(null);
+  const mobileMoveListEndRef = useRef<HTMLDivElement>(null);
 
   // Auto-scroll to bottom on new moves (only if not reviewing)
   useEffect(() => {
     if (reviewIndex === -1 && moveListEndRef.current) {
       moveListEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+    if (reviewIndex === -1 && mobileMoveListEndRef.current) {
+      mobileMoveListEndRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'end' });
     }
   }, [history.length, reviewIndex]);
 
@@ -245,7 +251,7 @@ const AIGame = () => {
 
   return (
     <div 
-      className="w-full h-full flex flex-col md:flex-row items-center justify-center p-4 gap-6 relative overflow-hidden"
+      className="w-[100vw] h-[100dvh] md:w-full md:h-full flex flex-col md:flex-row items-center justify-start md:justify-center md:p-4 gap-0 md:gap-6 relative overflow-hidden text-white sm:text-gray-900"
       style={{
         background: 'linear-gradient(135deg, #0a0a0a 0%, #0f0f1a 30%, #0a0a0a 60%, #0f0f1a 100%)',
       }}
@@ -256,13 +262,53 @@ const AIGame = () => {
           style={{ background: `${getDifficultyColor()}08` }} />
       </div>
 
-      {/* Mobile Settings Button */}
-      <button 
-        onClick={() => setShowThemeSelection(true)}
-        className="absolute top-4 right-4 md:hidden p-3 glass-card rounded-full text-gray-400 hover:text-[#e8b34b] z-40 transition-colors"
-      >
-        <Settings className="w-6 h-6" />
-      </button>
+      {/* ========================================================= */}
+      {/* MOBILE-ONLY: TOP APP HEADER (Tier 1)                      */}
+      {/* ========================================================= */}
+      <div className="flex md:hidden w-full h-14 shrink-0 items-center justify-between px-4 z-40 bg-black/40 border-b border-white/5">
+        <button 
+          onClick={() => {
+            if (gameStatus === 'active' && history.length > 0) setShowResignConfirm(true);
+            else navigate('/play');
+          }} 
+          className="p-2 -ml-2 text-gray-400 hover:text-white transition-colors"
+        >
+          <ArrowLeft className="w-6 h-6" />
+        </button>
+        <div className="flex items-center gap-2">
+          <Crown className="w-5 h-5 text-[#e8b34b]" />
+          <span className="font-['Montserrat'] font-bold text-lg text-white">Chess<span className="text-[#e8b34b]">Master</span></span>
+        </div>
+        <button onClick={() => setShowThemeSelection(true)} className="p-2 -mr-2 text-gray-400 hover:text-[#e8b34b] transition-colors">
+          <Settings className="w-6 h-6" />
+        </button>
+      </div>
+
+      {/* ========================================================= */}
+      {/* MOBILE-ONLY: HORIZONTAL MOVE LIST (Tier 2)                */}
+      {/* ========================================================= */}
+      <div className="flex md:hidden w-full h-10 shrink-0 bg-black/60 border-b border-white/5 items-center px-4 overflow-x-auto custom-scrollbar z-30 gap-3" ref={mobileMoveListRef}>
+        {history.length === 0 ? (
+          <span className="text-gray-500 text-xs italic">No moves yet...</span>
+        ) : (
+          history.reduce((acc, move, i) => {
+            if (i % 2 === 0) {
+              const moveNum = Math.floor(i / 2) + 1;
+              acc.push(
+                <div key={i} className="flex items-center gap-1.5 text-sm whitespace-nowrap">
+                  <span className="text-gray-500 font-medium">{moveNum}.</span>
+                  <button onClick={() => { if(reviewIndex === -1) startReview(); useGameStore.getState().setReviewIndex(i); }} className={`px-1 rounded ${reviewIndex === i ? 'text-black bg-[#e8b34b] font-bold' : 'text-gray-300'}`}>{move}</button>
+                  {history[i+1] && (
+                    <button onClick={() => { if(reviewIndex === -1) startReview(); useGameStore.getState().setReviewIndex(i+1); }} className={`px-1 rounded ${reviewIndex === i+1 ? 'text-black bg-[#e8b34b] font-bold' : 'text-gray-300'}`}>{history[i+1]}</button>
+                  )}
+                </div>
+              );
+            }
+            return acc;
+          }, [] as any[])
+        )}
+        <div ref={mobileMoveListEndRef} className="w-1 h-1 shrink-0" />
+      </div>
 
       <AnimatePresence>
         {showThemeSelection && <ThemeSelection onClose={() => setShowThemeSelection(false)} />}
@@ -455,96 +501,64 @@ const AIGame = () => {
         </div>
       </div>
 
-      <div className="flex flex-col items-center gap-4 relative z-10 w-full md:w-auto md:flex-1 md:min-w-0">
-        {/* Mobile Opponent Info */}
-        <div className="md:hidden flex justify-between items-center w-full px-4 glass-panel py-2 rounded-xl">
+      {/* ========================================================= */}
+      {/* CENTER COLUMN (Responsive)                                */}
+      {/* ========================================================= */}
+      <div className="flex flex-col items-center justify-center gap-0 md:gap-4 relative z-10 w-full md:w-auto md:flex-1 md:min-w-0 flex-1">
+        
+        {/* MOBILE-ONLY: OPPONENT ROW (Tier 3) */}
+        <div className="flex md:hidden w-full px-4 items-center justify-between py-2 z-20">
            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center">
-                {difficulty === 'custom' && customBot ? (
-                    <img src={customBot.avatar} alt="Bot" className="w-full h-full rounded-lg" />
-                ) : <Bot className="w-6 h-6 text-[#e8b34b]" />}
-              </div>
-              <div className="flex flex-col">
-                <span className="text-xs font-bold text-white">{opponentName}</span>
-                <span className="text-[10px] text-[#e8b34b]">{opponentLabel}</span>
-              </div>
+             <div className="w-10 h-10 rounded-md overflow-hidden bg-white/10 flex items-center justify-center border border-white/10 shadow-sm">
+               {difficulty === 'custom' && customBot ? <img src={customBot.avatar} alt="Bot" className="w-full h-full object-cover" /> : <Bot className="w-6 h-6 text-[#e8b34b]" />}
+             </div>
+             <div className="flex flex-col">
+               <div className="flex items-center gap-2">
+                 <span className="text-sm font-bold text-white leading-tight">{opponentName}</span>
+                 {displayEval < 0 && <span className="text-[10px] font-bold text-gray-900 bg-white/80 px-1 rounded-sm leading-tight tracking-wider">{(Math.abs(displayEval)/100).toFixed(1)}</span>}
+               </div>
+               <span className="text-[11px] text-[#e8b34b] font-medium leading-tight">{opponentLabel}</span>
+             </div>
            </div>
-           <ChessClock className="scale-75 origin-right" />
+           <div className="glass-panel px-3 py-1.5 rounded-lg border border-white/5 bg-black/50 shadow-inner min-w-[70px] flex justify-center">
+             <ChessClock mode="top" />
+           </div>
         </div>
+
         {/* Board + Desktop Clock Container */}
-        <div className="flex items-stretch justify-center gap-3 md:gap-4 w-full mt-2 md:mt-0">
+        <div className="flex items-stretch justify-center gap-3 md:gap-4 w-full">
           {/* Board Wrapper */}
-          <div className="flex flex-col justify-center min-w-0 w-full max-w-[min(100vw-32px,65vh)] md:w-[min(95vh,calc(100%-110px))]">
-            <div className="w-full aspect-square relative">
+          <div className="flex flex-col justify-center min-w-0 w-full max-w-[100vw] md:max-w-[min(100vw-32px,65vh)] md:w-[min(95vh,calc(100%-110px))]">
+            <div className="w-full aspect-square relative drop-shadow-2xl md:drop-shadow-none z-10">
               <Board />
             </div>
           </div>
           {/* Desktop Clock */}
-          <div className="hidden md:flex flex-col justify-between flex-shrink-0 w-[90px] py-1">
+          <div className="hidden md:flex flex-col justify-between flex-shrink-0 w-[90px] py-1 shadow-lg md:shadow-none bg-black/20 md:bg-transparent rounded-lg">
             <ChessClock className="h-full justify-between" />
           </div>
         </div>
-        {/* Mobile Controls */}
-        <div className="flex flex-col gap-3 w-full md:hidden px-2">
-            
-            {/* Game Status / Actions */}
-            <div className="glass-panel p-3 rounded-xl flex items-center justify-between">
-               <div className="flex items-center gap-2">
-                  <div className={`
-                    px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider
-                    ${gameStatus === 'active' ? 'bg-green-500/20 text-green-400' : 'bg-[#e8b34b]/20 text-[#e8b34b]'}
-                  `}>
-                    {gameStatus === 'active' ? (game.turn() === 'w' ? 'White to Move' : 'Black to Move') : gameStatus}
-                  </div>
-               </div>
-               
-               <div className="flex gap-2">
-                  <button 
-                    onClick={() => { if (gameStatus !== 'active') { resetGame(); audio.playGameStart(); } }}
-                    disabled={gameStatus === 'active'}
-                    className={`p-2 rounded-lg ${gameStatus === 'active' ? 'bg-gray-800/50 text-gray-600 cursor-not-allowed opacity-50' : 'bg-[#e8b34b]/10 text-[#e8b34b]'}`}
-                  >
-                    <RefreshCw className="w-4 h-4" />
-                  </button>
-                  {reviewIndex === -1 && (
-                    <button onClick={() => setShowResignConfirm(true)} className="p-2 bg-red-500/10 text-red-400 rounded-lg">
-                      <Flag className="w-4 h-4" />
-                    </button>
-                  )}
-               </div>
-            </div>
 
-            {/* Navigation — always visible */}
-            <div className="flex justify-center items-center gap-2 glass-panel p-2 rounded-xl">
-               <button onClick={handleGoToStart} disabled={!canGoStart} className={navBtnClass(canGoStart)} title="First Move">
-                 <ChevronsLeft className="w-4 h-4" />
-               </button>
-               <button onClick={handlePrev} disabled={!canPrev} className={navBtnClass(canPrev)} title="Previous">
-                 <ChevronLeft className="w-4 h-4" />
-               </button>
-               <button onClick={handleNext} disabled={!canNext} className={navBtnClass(canNext)} title="Next">
-                 <ChevronRight className="w-4 h-4" />
-               </button>
-               <button onClick={handleGoToEnd} disabled={!canGoLive} className={navBtnClass(canGoLive)} title="Latest">
-                 <ChevronsRight className="w-4 h-4" />
-               </button>
-            </div>
+        {/* MOBILE-ONLY: PLAYER ROW (Tier 5) */}
+        <div className="flex md:hidden w-full px-4 items-center justify-between py-2 z-20 mt-auto md:mt-0">
+           <div className="flex items-center gap-3">
+             <div className="w-10 h-10 rounded-md overflow-hidden bg-gradient-to-br from-gray-700 to-gray-900 flex items-center justify-center border border-white/10 shadow-sm">
+               <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${playerColor}&backgroundColor=transparent`} alt="Player" className="w-full h-full" />
+             </div>
+             <div className="flex flex-col">
+               <div className="flex items-center gap-2">
+                 <span className="text-sm font-bold text-white leading-tight">You</span>
+                 {displayEval > 0 && <span className="text-[10px] font-bold text-gray-900 bg-white/80 px-1 rounded-sm leading-tight tracking-wider">+{(Math.abs(displayEval)/100).toFixed(1)}</span>}
+               </div>
+               <span className="text-[11px] text-gray-400 font-medium leading-tight capitalize">{playerColor}</span>
+             </div>
+           </div>
+           <div className="glass-panel px-3 py-1.5 rounded-lg border border-white/5 bg-black/50 shadow-inner min-w-[70px] flex justify-center">
+             <ChessClock mode="bottom" />
+           </div>
         </div>
 
       </div>
-
-      {/* Flip Board Button - Mobile (Repositioned to mobile controls) */}
-      <button
-        onClick={flipBoard}
-        className="md:hidden flex items-center justify-center gap-2 w-full py-3 mb-4 rounded-xl text-gray-400 hover:text-[#e8b34b] transition-all duration-200 glass-panel"
-        style={{
-          border: '1px solid rgba(232, 179, 75, 0.1)',
-        }}
-        title="Flip Board"
-      >
-        <RotateCw className="w-4 h-4" />
-        <span className="text-xs uppercase tracking-wider font-medium">Flip Board</span>
-      </button>
 
       {/* Resign Confirmation Modal */}
       {showResignConfirm && (
@@ -650,6 +664,68 @@ const AIGame = () => {
           <span className="text-xs uppercase tracking-wider font-medium">Flip Board</span>
         </button>
       </div>
+      {/* ========================================================= */}
+      {/* MOBILE-ONLY: BOTTOM NAV BAR (Tier 6)                        */}
+      {/* ========================================================= */}
+      <div className="flex md:hidden w-full h-16 shrink-0 bg-[#0a0a0a] border-t border-white/5 items-center justify-between px-2 pb-safe z-40 shadow-[0_-4px_20px_rgba(0,0,0,0.5)]">
+        <button onClick={() => setShowMobileOptions(true)} className="flex flex-col items-center justify-center w-14 h-full text-gray-400 hover:text-white transition-colors">
+          <div className="flex flex-col gap-1 items-center justify-center w-5 h-5 mb-1">
+            <div className="w-4 h-[2px] bg-current rounded-full" />
+            <div className="w-4 h-[2px] bg-current rounded-full" />
+            <div className="w-4 h-[2px] bg-current rounded-full" />
+          </div>
+          <span className="text-[10px] font-medium">Options</span>
+        </button>
+        <button onClick={flipBoard} className="flex flex-col items-center justify-center w-14 h-full text-gray-400 hover:text-white transition-colors">
+          <RotateCw className="w-4 h-4 mb-1" />
+          <span className="text-[10px] font-medium">Flip</span>
+        </button>
+
+        <div className="relative group flex items-center justify-center px-2">
+           {/* Central Action Button */}
+           <button onClick={() => { if(gameStatus !== 'active') { resetGame(); audio.playGameStart(); } }} className={`w-12 h-12 rounded-xl flex items-center justify-center transform transition-all active:scale-95 ${gameStatus === 'active' ? 'bg-[#e8b34b]/10 text-[#e8b34b] border border-[#e8b34b]/20' : 'btn-gold shadow-lg shadow-[#e8b34b]/20'}`}>
+             {gameStatus === 'active' ? <Crown className="w-6 h-6 opacity-50" /> : <RefreshCw className="w-6 h-6" />}
+           </button>
+        </div>
+
+        <button onClick={handlePrev} disabled={!canPrev} className={`flex flex-col items-center justify-center w-14 h-full transition-colors ${canPrev ? 'text-gray-400 hover:text-white' : 'text-gray-700'}`}>
+          <ChevronLeft className="w-5 h-5 mb-1" />
+          <span className="text-[10px] font-medium">Back</span>
+        </button>
+        <button onClick={handleNext} disabled={!canNext} className={`flex flex-col items-center justify-center w-14 h-full transition-colors ${canNext ? 'text-gray-400 hover:text-white' : 'text-gray-700'}`}>
+          <ChevronRight className="w-5 h-5 mb-1" />
+          <span className="text-[10px] font-medium">Forward</span>
+        </button>
+      </div>
+
+      {/* Mobile Options Modal */}
+      {showMobileOptions && (
+        <div className="md:hidden fixed inset-0 z-50 flex flex-col justify-end pointer-events-none">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm pointer-events-auto transition-opacity" onClick={() => setShowMobileOptions(false)} />
+          <div className="w-full glass-panel rounded-t-2xl p-4 flex flex-col gap-2 pointer-events-auto animate-in slide-in-from-bottom-2 duration-200 border-t border-white/10 shadow-[0_-10px_40px_rgba(0,0,0,0.5)]">
+            <div className="w-12 h-1 bg-white/20 rounded-full mx-auto mb-2" />
+            <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 px-2">Options</h3>
+            
+            {gameStatus === 'active' && (
+              <button onClick={() => { setShowMobileOptions(false); setShowResignConfirm(true); }} className="w-full text-left px-4 py-3.5 rounded-xl text-red-400 bg-red-500/10 hover:bg-red-500/20 font-semibold flex items-center gap-3 transition-colors border border-red-500/20">
+                <Flag className="w-5 h-5" /> Resign Game
+              </button>
+            )}
+            {gameStatus !== 'active' && (
+              <button onClick={() => { setShowMobileOptions(false); resetGame(); audio.playGameStart(); }} className="w-full text-left px-4 py-3.5 rounded-xl text-[#e8b34b] bg-[#e8b34b]/10 hover:bg-[#e8b34b]/20 font-semibold flex items-center gap-3 transition-colors border border-[#e8b34b]/20">
+                <RefreshCw className="w-5 h-5" /> New Game
+              </button>
+            )}
+            <button onClick={() => { setShowMobileOptions(false); navigate('/play'); }} className="w-full text-left px-4 py-3.5 rounded-xl text-white bg-white/5 hover:bg-white/10 font-semibold flex items-center gap-3 transition-colors border border-white/5">
+              <ArrowLeft className="w-5 h-5" /> Exit to Main Menu
+            </button>
+            <button onClick={() => setShowMobileOptions(false)} className="w-full text-center px-4 py-3.5 mt-2 rounded-xl text-gray-400 hover:text-white font-medium transition-colors">
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 };
