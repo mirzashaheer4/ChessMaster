@@ -19,6 +19,44 @@
 }
 /* Desktop (≥1024px): inline style width: min(95vh, calc(100% - 110px)) takes over */
 
+/* ============================================================
+   MOBILE GPU PERFORMANCE OPTIMIZATION
+   backdrop-filter: blur() is the #1 mobile GPU killer.
+   Each blurred element forces full-layer re-compositing.
+   On mobile, reduce blur radii and strip heavy decorative effects.
+   Desktop appearance is 100% unchanged.
+   ============================================================ */
+@media (max-width: 1023px) {
+  .glass-panel {
+    backdrop-filter: blur(8px) !important;
+    -webkit-backdrop-filter: blur(8px) !important;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3) !important;
+  }
+
+  .glass-panel::before {
+    display: none !important;
+  }
+
+  .glass-card {
+    backdrop-filter: blur(8px) !important;
+    -webkit-backdrop-filter: blur(8px) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25) !important;
+  }
+
+  .glass-navbar {
+    backdrop-filter: blur(8px) !important;
+    -webkit-backdrop-filter: blur(8px) !important;
+  }
+
+  /* Reduce decorative background glow blurs */
+  .blur-\[100px\],
+  .blur-\[120px\],
+  .blur-\[150px\] {
+    filter: blur(40px) !important;
+    opacity: 0.5 !important;
+  }
+}
+
 @layer base {
   :root {
     /* Custom Colors */
