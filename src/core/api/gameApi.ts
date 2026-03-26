@@ -1,8 +1,7 @@
 import { useAuthStore } from '../store/auth';
+import { getApiServerUrl } from './urlUtils';
 
-const rawServerUrl = import.meta.env.VITE_SERVER_URL || '';
-const SERVER_URL = rawServerUrl.endsWith('/') ? rawServerUrl.slice(0, -1) : rawServerUrl;
-const API_BASE = `${SERVER_URL}/api`;
+const API_BASE = `${getApiServerUrl()}/api`;
 
 /**
  * Cloud Game Data — matches what the server returns

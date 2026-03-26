@@ -14,5 +14,8 @@ export function getServerUrl(envUrl?: string, defaultUrl = 'http://localhost:300
  * Usage: const apiUrl = getApiServerUrl(import.meta.env.VITE_SERVER_URL)
  */
 export function getApiServerUrl(): string {
-  return getServerUrl(import.meta.env.VITE_SERVER_URL as string);
+  // Absolute URL is REQUIRED for Capacitor. 
+  // If no env var, we fallback to localhost:3001 (works for web dev, needs IP for mobile).
+  const defaultUrl = 'http://localhost:3001';
+  return getServerUrl(import.meta.env.VITE_SERVER_URL as string, defaultUrl);
 }
