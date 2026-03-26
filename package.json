@@ -12,8 +12,12 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@capacitor/android": "^8.3.0",
+    "@capacitor/cli": "^8.3.0",
+    "@capacitor/core": "^8.3.0",
     "@fontsource/inter": "^5.2.8",
     "@fontsource/oswald": "^5.2.8",
+    "@react-three/fiber": "^9.5.0",
     "chess.js": "^1.4.0",
     "clsx": "^2.1.1",
     "framer-motion": "^12.29.2",
@@ -25,6 +29,7 @@
     "react-router-dom": "^7.13.1",
     "socket.io-client": "^4.8.3",
     "tailwind-merge": "^3.4.0",
+    "three": "^0.183.2",
     "use-sound": "^5.0.0",
     "zustand": "^5.0.10"
   },
