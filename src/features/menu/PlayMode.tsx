@@ -20,7 +20,8 @@ const FloatingPiece = ({
 
 // ─── Particle Background ──────────────────────────────────────────
 const ParticleBackground = ({ theme = 'default', intensity = 1 }: { theme?: 'default' | 'pvp' | 'ai' | 'online' | 'dev', intensity?: number }) => {
-  const particles = Array.from({ length: 30 * intensity }, (_, i) => ({
+  const isMobileDevice = typeof window !== 'undefined' && window.innerWidth < 1024;
+  const particles = Array.from({ length: isMobileDevice ? 8 : 30 * intensity }, (_, i) => ({
     id: i,
     left: `${Math.random() * 100}%`,
     delay: `${Math.random() * 20}s`,
@@ -186,7 +187,7 @@ const GameModeCard = ({ mode, isActive, isFaded, onClick, onMouseEnter, onMouseL
         style={{
           backgroundImage: isActive ? mode.cardGradient : 'none',
           backgroundColor: isActive ? '#0a0a0f' : 'rgba(21, 21, 21, 0.95)',
-          backdropFilter: 'blur(20px)',
+          /* backdropFilter handled by CSS class overrides on mobile */
           border: isActive ? `2px solid ${mode.cardBorder}` : '1px solid rgba(255, 255, 255, 0.08)',
           boxShadow: isActive ? mode.cardShadow : '0 8px 32px rgba(0, 0, 0, 0.3)',
           transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
@@ -347,38 +348,44 @@ export default function PlayMode() {
         }}
       />
 
-      {/* Theme-specific Particles */}
-      <div className="fixed inset-0 pointer-events-none">
-        <ParticleBackground theme={activeThemeModeId as 'default'|'pvp'|'ai'|'online'|'dev'} intensity={activeThemeModeId === 'none' ? 1 : 1.5} />
-      </div>
+      {/* Theme-specific Particles — disabled on mobile */}
+      {!isMobile && (
+        <div className="fixed inset-0 pointer-events-none">
+          <ParticleBackground theme={activeThemeModeId as 'default'|'pvp'|'ai'|'online'|'dev'} intensity={activeThemeModeId === 'none' ? 1 : 1.5} />
+        </div>
+      )}
 
-      {/* Floating Pieces with Parallax */}
-      <FloatingPiece 
-        src="/landing/chess-king.png" 
-        className="w-20 md:w-32 opacity-30 fixed"
-        style={{ 
-          top: '10%', 
-          left: '5%', 
-          animationDelay: '0s',
-          transform: isMobile ? 'none' : `translate(${mousePos.x * -2}px, ${mousePos.y * -2}px)`,
-          transition: 'transform 0.3s ease-out',
-        }}
-      />
-      <FloatingPiece 
-        src="/landing/robot-queen.png" 
-        className="w-16 md:w-24 opacity-40 fixed"
-        style={{ 
-          top: '70%', 
-          right: '8%', 
-          animationDelay: '1s',
-          transform: isMobile ? 'none' : `translate(${mousePos.x * 1.5}px, ${mousePos.y * 1.5}px)`,
-          transition: 'transform 0.3s ease-out',
-        }}
-        animationClass="animate-float-reverse"
-      />
+      {/* Floating Pieces with Parallax — disabled on mobile */}
+      {!isMobile && (
+        <>
+          <FloatingPiece 
+            src="/landing/chess-king.png" 
+            className="w-20 md:w-32 opacity-30 fixed"
+            style={{ 
+              top: '10%', 
+              left: '5%', 
+              animationDelay: '0s',
+              transform: `translate(${mousePos.x * -2}px, ${mousePos.y * -2}px)`,
+              transition: 'transform 0.3s ease-out',
+            }}
+          />
+          <FloatingPiece 
+            src="/landing/robot-queen.png" 
+            className="w-16 md:w-24 opacity-40 fixed"
+            style={{ 
+              top: '70%', 
+              right: '8%', 
+              animationDelay: '1s',
+              transform: `translate(${mousePos.x * 1.5}px, ${mousePos.y * 1.5}px)`,
+              transition: 'transform 0.3s ease-out',
+            }}
+            animationClass="animate-float-reverse"
+          />
+        </>
+      )}
       
-      {/* Scan Line Effect for AI/Dev Mode */}
-      {(activeThemeModeId === 'ai' || activeThemeModeId === 'dev') && (
+      {/* Scan Line Effect for AI/Dev Mode — disabled on mobile */}
+      {!isMobile && (activeThemeModeId === 'ai' || activeThemeModeId === 'dev') && (
         <div 
           className="fixed inset-0 pointer-events-none overflow-hidden"
           style={{

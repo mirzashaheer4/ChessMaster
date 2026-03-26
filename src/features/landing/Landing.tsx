@@ -33,7 +33,8 @@ const FloatingPiece = ({
 
 // ─── Particle Background ──────────────────────────────────────────
 const ParticleBackground = () => {
-  const particles = Array.from({ length: 30 }, (_, i) => ({
+  const isMobileDevice = typeof window !== 'undefined' && window.innerWidth < 1024;
+  const particles = Array.from({ length: isMobileDevice ? 6 : 30 }, (_, i) => ({
     id: i,
     left: `${Math.random() * 100}%`,
     delay: `${Math.random() * 20}s`,
@@ -182,13 +183,15 @@ const HeroSection = () => (
     {/* Particle Background */}
     <ParticleBackground />
     
-    {/* Floating Chess Pieces */}
-    <FloatingPiece src="/landing/chess-king.png" className="w-24 md:w-40 opacity-60 pointer-events-none" style={{ top: '15%', left: '5%', animationDelay: '0s' }} />
-    <FloatingPiece src="/landing/chess-queen.png" className="w-20 md:w-32 opacity-50 pointer-events-none" style={{ top: '60%', left: '8%', animationDelay: '2s' }} animationClass="animate-float-reverse" />
-    <FloatingPiece src="/landing/chess-knight.png" className="w-16 md:w-28 opacity-50 pointer-events-none" style={{ top: '20%', right: '10%', animationDelay: '1s' }} animationClass="animate-float-slow" />
-    <FloatingPiece src="/landing/chess-rook.png" className="w-14 md:w-24 opacity-40 pointer-events-none" style={{ top: '65%', right: '5%', animationDelay: '3s' }} />
-    <FloatingPiece src="/landing/chess-bishop.png" className="w-12 md:w-20 opacity-40 pointer-events-none" style={{ top: '40%', left: '2%', animationDelay: '4s' }} animationClass="animate-float-slow" />
-    <FloatingPiece src="/landing/chess-pawn.png" className="w-10 md:w-16 opacity-30 pointer-events-none" style={{ bottom: '20%', right: '15%', animationDelay: '2.5s' }} animationClass="animate-float-reverse" />
+    {/* Floating Chess Pieces — hidden on mobile for GPU performance */}
+    <div className="hidden lg:block">
+      <FloatingPiece src="/landing/chess-king.png" className="w-24 md:w-40 opacity-60 pointer-events-none" style={{ top: '15%', left: '5%', animationDelay: '0s' }} />
+      <FloatingPiece src="/landing/chess-queen.png" className="w-20 md:w-32 opacity-50 pointer-events-none" style={{ top: '60%', left: '8%', animationDelay: '2s' }} animationClass="animate-float-reverse" />
+      <FloatingPiece src="/landing/chess-knight.png" className="w-16 md:w-28 opacity-50 pointer-events-none" style={{ top: '20%', right: '10%', animationDelay: '1s' }} animationClass="animate-float-slow" />
+      <FloatingPiece src="/landing/chess-rook.png" className="w-14 md:w-24 opacity-40 pointer-events-none" style={{ top: '65%', right: '5%', animationDelay: '3s' }} />
+      <FloatingPiece src="/landing/chess-bishop.png" className="w-12 md:w-20 opacity-40 pointer-events-none" style={{ top: '40%', left: '2%', animationDelay: '4s' }} animationClass="animate-float-slow" />
+      <FloatingPiece src="/landing/chess-pawn.png" className="w-10 md:w-16 opacity-30 pointer-events-none" style={{ bottom: '20%', right: '15%', animationDelay: '2.5s' }} animationClass="animate-float-reverse" />
+    </div>
 
     {/* Content Grid */}
     <div className="relative z-10 max-w-7xl mx-auto px-6 pt-24 pb-12 w-full flex flex-col lg:flex-row items-center justify-between gap-12 lg:gap-20">

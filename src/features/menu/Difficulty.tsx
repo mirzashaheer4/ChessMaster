@@ -27,7 +27,8 @@ const levels: { id: Difficulty; label: string; desc: string; icon: React.FC<{ cl
 
 // Particle Background
 const ParticleBackground = ({ color = 'rgba(139, 92, 246, 0.4)' }: { color?: string }) => {
-  const particles = Array.from({ length: 20 }, (_, i) => ({
+  const isMobileDevice = typeof window !== 'undefined' && window.innerWidth < 1024;
+  const particles = Array.from({ length: isMobileDevice ? 6 : 20 }, (_, i) => ({
     id: i,
     left: `${Math.random() * 100}%`,
     delay: `${Math.random() * 20}s`,
@@ -73,7 +74,7 @@ const DifficultyCard = ({ level, i, isActive, isFaded, onClick, onMouseEnter, on
           ? `linear-gradient(135deg, ${level.glow} 0%, rgba(21, 21, 21, 0.1) 100%)`
           : 'none',
         backgroundColor: isActive ? '#0a0a0f' : 'rgba(21, 21, 21, 0.95)',
-        backdropFilter: 'blur(20px)',
+        /* backdropFilter handled by CSS class overrides on mobile */
         border: isActive 
           ? `2px solid ${level.color}80` 
           : '1px solid rgba(255, 255, 255, 0.08)',
@@ -215,13 +216,15 @@ const DifficultyScreen = () => {
       }}
     >
       {/* Background Effects */}
-      <ParticleBackground color={activeColor.replace('rgb', 'rgba').replace(')', ', 0.4)')} />
-      <div className="absolute inset-0 pointer-events-none">
-        <div 
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full blur-[100px] transition-colors duration-700"
-          style={{ background: `${activeColor}15` }}
-        />
-      </div>
+      {!isMobile && <ParticleBackground color={activeColor.replace('rgb', 'rgba').replace(')', ', 0.4)')} />}
+      {!isMobile && (
+        <div className="absolute inset-0 pointer-events-none">
+          <div 
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full blur-[100px] transition-colors duration-700"
+            style={{ background: `${activeColor}15` }}
+          />
+        </div>
+      )}
 
       {/* Game Setup Modal */}
       <GameSetupModal

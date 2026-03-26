@@ -23,14 +23,27 @@
    MOBILE GPU PERFORMANCE OPTIMIZATION
    backdrop-filter: blur() is the #1 mobile GPU killer.
    Each blurred element forces full-layer re-compositing.
-   On mobile, reduce blur radii and strip heavy decorative effects.
+   This UNIVERSAL override catches ALL elements (not just named
+   classes) — including Tailwind utilities like backdrop-blur-sm,
+   backdrop-blur-md, backdrop-blur-xl, etc.
    Desktop appearance is 100% unchanged.
    ============================================================ */
 @media (max-width: 1023px) {
-  .glass-panel {
+  /* UNIVERSAL override: cap ALL backdrop-filter blur to 8px */
+  * {
+    --tw-backdrop-blur: blur(8px) !important;
+  }
+
+  .glass-panel,
+  .glass-card,
+  .glass-navbar,
+  [class*="backdrop-blur"] {
     backdrop-filter: blur(8px) !important;
     -webkit-backdrop-filter: blur(8px) !important;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3) !important;
+  }
+
+  .glass-panel {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
   }
 
   .glass-panel::before {
@@ -38,22 +51,23 @@
   }
 
   .glass-card {
-    backdrop-filter: blur(8px) !important;
-    -webkit-backdrop-filter: blur(8px) !important;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25) !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2) !important;
   }
 
-  .glass-navbar {
-    backdrop-filter: blur(8px) !important;
-    -webkit-backdrop-filter: blur(8px) !important;
+  /* Kill large decorative background blur blobs */
+  [class*="blur-["] {
+    filter: blur(30px) !important;
+    opacity: 0.3 !important;
   }
 
-  /* Reduce decorative background glow blurs */
-  .blur-\[100px\],
-  .blur-\[120px\],
-  .blur-\[150px\] {
-    filter: blur(40px) !important;
-    opacity: 0.5 !important;
+  /* Disable drop-shadow-2xl on mobile */
+  .drop-shadow-2xl {
+    filter: none !important;
+  }
+
+  /* Reduce transition complexity */
+  [class*="transition-all"] {
+    transition-property: opacity, transform !important;
   }
 }
 
