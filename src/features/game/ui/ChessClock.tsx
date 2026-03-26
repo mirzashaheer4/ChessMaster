@@ -40,7 +40,7 @@ const ChessClock: React.FC<ChessClockProps> = ({ className = '', mode = 'both' }
   // When playerColor is null (local mode), follow boardFlipped directly
   const showBlackOnTop = playerColor === null 
     ? !boardFlipped  // local mode: default white at bottom (black on top), flip swaps
-    : boardFlipped ? playerColor !== 'black' : playerColor === 'black';
+    : boardFlipped ? playerColor === 'black' : playerColor === 'white';
   
   const whiteLow = whiteTime < 30000; // Less than 30 seconds
   const blackLow = blackTime < 30000;
@@ -49,26 +49,23 @@ const ChessClock: React.FC<ChessClockProps> = ({ className = '', mode = 'both' }
     time, 
     isActive, 
     isLow, 
-    label 
   }: { 
     time: number; 
     isActive: boolean; 
     isLow: boolean; 
-    label: string;
   }) => (
     <div 
       className={`
-        px-4 py-2 rounded-lg font-mono text-lg font-bold transition-all
+        px-3 py-1.5 md:px-4 md:py-2 rounded-lg font-mono text-xl md:text-2xl font-bold transition-all
         ${isActive 
           ? isLow 
-            ? 'bg-red-500/20 text-red-400 ring-2 ring-red-500 animate-pulse' 
-            : 'bg-[#D4AF37]/20 text-[#D4AF37] ring-2 ring-[#D4AF37]'
-          : 'bg-zinc-800/50 text-zinc-400'
+            ? 'bg-red-500/20 text-red-400 ring-2 ring-red-500 animate-pulse drop-shadow-[0_0_15px_rgba(239,68,68,0.5)]' 
+            : 'bg-[#D4AF37]/20 text-[#D4AF37] ring-2 ring-[#D4AF37] drop-shadow-[0_0_15px_rgba(212,175,55,0.6)]'
+          : 'bg-zinc-800/50 text-zinc-400 border border-white/5'
         }
       `}
     >
-      <div className="text-[10px] uppercase tracking-wider opacity-60 mb-0.5">{label}</div>
-      <div className="text-xl tabular-nums">{formatTime(time)}</div>
+      <div className="tabular-nums tracking-wider">{formatTime(time)}</div>
     </div>
   );
 
@@ -76,16 +73,16 @@ const ChessClock: React.FC<ChessClockProps> = ({ className = '', mode = 'both' }
     <div className={`flex flex-col gap-2 ${className}`}>
       {mode !== 'bottom' && (
         showBlackOnTop ? (
-          <ClockDisplay time={blackTime} isActive={!isWhiteTurn && clockRunning} isLow={blackLow} label="Black" />
+          <ClockDisplay time={blackTime} isActive={!isWhiteTurn && clockRunning} isLow={blackLow} />
         ) : (
-          <ClockDisplay time={whiteTime} isActive={isWhiteTurn && clockRunning} isLow={whiteLow} label="White" />
+          <ClockDisplay time={whiteTime} isActive={isWhiteTurn && clockRunning} isLow={whiteLow} />
         )
       )}
       {mode !== 'top' && (
         showBlackOnTop ? (
-          <ClockDisplay time={whiteTime} isActive={isWhiteTurn && clockRunning} isLow={whiteLow} label="White" />
+          <ClockDisplay time={whiteTime} isActive={isWhiteTurn && clockRunning} isLow={whiteLow} />
         ) : (
-          <ClockDisplay time={blackTime} isActive={!isWhiteTurn && clockRunning} isLow={blackLow} label="Black" />
+          <ClockDisplay time={blackTime} isActive={!isWhiteTurn && clockRunning} isLow={blackLow} />
         )
       )}
     </div>

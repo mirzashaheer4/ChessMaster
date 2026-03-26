@@ -9,6 +9,16 @@
   --color-obsidian: #0f0f0f;
 }
 
+/* Board wrapper: responsive sizing */
+/* Mobile + Tablet (<1024px): full-width, capped by viewport height */
+@media (max-width: 1023px) {
+  .board-wrapper {
+    width: 100% !important;
+    max-width: min(90vh, 100vw) !important;
+  }
+}
+/* Desktop (≥1024px): inline style width: min(95vh, calc(100% - 110px)) takes over */
+
 @layer base {
   :root {
     /* Custom Colors */

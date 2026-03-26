@@ -297,7 +297,7 @@ export const Board: React.FC = () => {
   
   const [lastMove, setLastMove] = useState<{ from: string; to: string } | null>(null);
   const [selectedSquare, setSelectedSquare] = useState<string | null>(null);
-  const [capturePosition, setCapturePosition] = useState<{ x: number; y: number } | null>(null);
+  const [capturePosition, setCapturePosition] = useState<{ x: number | string; y: number | string } | null>(null);
   const [captureKey, setCaptureKey] = useState(0); // Increment to force re-trigger capture effect
   const boardRef = useRef<HTMLDivElement>(null);
   const [boardSize, setBoardSize] = useState(0);
@@ -560,12 +560,12 @@ export const Board: React.FC = () => {
         audio.playMove();
       }
 
-      // Capture smoke effect on forward navigation
-      if (isCapture && boardRef.current) {
-        const rect = boardRef.current.getBoundingClientRect();
-        const squareSize = rect.width / 8;
-        const { x, y } = squareToCoords(lastVerbose.to, squareSize, effectiveColor);
-        setCapturePosition({ x: x + rect.left, y: y + rect.top });
+      // Capture smoke effect on forward navigation — use percentage coords for resize-safety
+      if (isCapture) {
+        const [visualRow, visualCol] = logicalToVisualPosition(lastVerbose.to, effectiveColor);
+        const xPercent = `${((visualCol + 0.5) / 8) * 100}%`;
+        const yPercent = `${((visualRow + 0.5) / 8) * 100}%`;
+        setCapturePosition({ x: xPercent, y: yPercent });
         setCaptureKey(k => k + 1);
       }
 
@@ -637,7 +637,7 @@ export const Board: React.FC = () => {
         const rect = boardRef.current.getBoundingClientRect();
         const squareSize = rect.width / 8;
         const { x, y } = squareToCoords(lastVerbose.from, squareSize, effectiveColor);
-        setCapturePosition({ x: x + rect.left, y: y + rect.top });
+        setCapturePosition({ x, y });
         setCaptureKey(k => k + 1);
       }
 
@@ -719,7 +719,7 @@ export const Board: React.FC = () => {
             const squareSize = rect.width / 8;
             // CRITICAL FIX: Pass effectiveColor to squareToCoords to handle mirrored boards
             const { x, y } = squareToCoords(targetSquare, squareSize, effectiveColor);
-            setCapturePosition({ x: x + rect.left, y: y + rect.top });
+            setCapturePosition({ x, y });
             setCaptureKey(k => k + 1);
         }
     }
@@ -1188,6 +1188,7 @@ export const Board: React.FC = () => {
                   key={captureKey}
                   x={capturePosition.x}
                   y={capturePosition.y}
+                  isAbsolute={true}
                 />
               )}
               {/* === MOVE ANIMATION GHOST OVERLAY === */}
@@ -1290,14 +1291,6 @@ export const Board: React.FC = () => {
       </div>
     </DndProvider>
     
-    {/* Capture Effect Animation - key forces full remount on each capture */}
-    {capturePosition && (
-      <CaptureEffect 
-        key={captureKey}
-        x={capturePosition.x}
-        y={capturePosition.y}
-      />
-    )}
   </>
   );
 };

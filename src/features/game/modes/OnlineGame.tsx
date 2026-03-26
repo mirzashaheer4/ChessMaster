@@ -179,14 +179,14 @@ const OnlineGame = () => {
   // ── Main Game View ──
   return (
     <div
-      className="w-[100vw] h-[100dvh] md:w-full md:h-full flex flex-col md:flex-row items-center justify-start md:justify-center md:p-4 gap-0 md:gap-6 relative overflow-hidden text-white sm:text-gray-900"
+      className="w-[100vw] h-[100dvh] lg:w-full lg:h-full flex flex-col lg:flex-row items-center justify-start lg:justify-center lg:p-4 gap-0 lg:gap-6 relative overflow-hidden text-white"
       style={{
         background: 'linear-gradient(135deg, #0a0a0a 0%, #0d1117 40%, #0a0a0a 100%)',
       }}
     >
       {/* Connection Status Bar */}
       {opponentDisconnected && (
-        <div className="absolute top-14 md:top-0 left-0 right-0 z-50 bg-yellow-500/20 border-b border-yellow-500/30 px-4 py-2 text-center mt-10 md:mt-0">
+        <div className="absolute top-14 lg:top-0 left-0 right-0 z-50 bg-yellow-500/20 border-b border-yellow-500/30 px-4 py-2 text-center mt-10 lg:mt-0">
           <span className="text-yellow-400 text-sm font-semibold flex items-center justify-center gap-2">
             <WifiOff className="w-4 h-4" /> Opponent disconnected — waiting 30s for reconnection...
           </span>
@@ -195,7 +195,7 @@ const OnlineGame = () => {
 
       {/* Draw Offer Banner */}
       {drawOfferedBy && drawOfferedBy !== onlineColor && gameStatus === 'active' && (
-        <div className="absolute top-14 md:top-0 left-0 right-0 z-50 bg-emerald-500/20 border-b border-emerald-500/30 px-4 py-3 flex items-center justify-center gap-4 mt-10 md:mt-0">
+        <div className="absolute top-14 lg:top-0 left-0 right-0 z-50 bg-emerald-500/20 border-b border-emerald-500/30 px-4 py-3 flex items-center justify-center gap-4 mt-10 lg:mt-0">
           <span className="text-emerald-300 text-sm font-semibold">
             <Handshake className="w-4 h-4 inline mr-2" />
             {opponentName} offers a draw
@@ -218,7 +218,7 @@ const OnlineGame = () => {
       {/* ========================================================= */}
       {/* MOBILE-ONLY: TOP APP HEADER (Tier 1)                      */}
       {/* ========================================================= */}
-      <div className="flex md:hidden w-full h-14 shrink-0 items-center justify-between px-4 z-40 bg-black/40 border-b border-white/5">
+      <div className="flex lg:hidden w-full h-14 shrink-0 items-center justify-between px-4 z-40 bg-black/40 border-b border-white/5">
         <button 
           onClick={() => {
             if (onlineStatus === 'playing') setShowResignConfirm(true);
@@ -238,7 +238,7 @@ const OnlineGame = () => {
       {/* ========================================================= */}
       {/* MOBILE-ONLY: HORIZONTAL MOVE LIST (Tier 2)                */}
       {/* ========================================================= */}
-      <div className="flex md:hidden w-full h-10 shrink-0 bg-black/60 border-b border-white/5 items-center px-4 overflow-x-auto custom-scrollbar z-30 gap-3" ref={mobileMoveListRef}>
+      <div className="flex lg:hidden w-full h-10 shrink-0 bg-black/60 border-b border-white/5 items-center px-4 overflow-x-auto custom-scrollbar z-30 gap-3" ref={mobileMoveListRef}>
         {history.length === 0 ? (
           <span className="text-gray-500 text-xs italic">No moves yet...</span>
         ) : (
@@ -262,10 +262,10 @@ const OnlineGame = () => {
       </div>
 
       {/* Main 3-column layout */}
-      <div className="flex-1 flex flex-col md:flex-row items-center justify-center gap-4 md:gap-6 px-4 md:px-8 py-4 min-h-0 w-full relative z-10 w-full md:w-auto md:flex-1 md:min-w-0">
+      <div className="flex-1 flex flex-col lg:flex-row items-center justify-center gap-4 lg:gap-6 px-4 lg:px-8 py-4 min-h-0 w-full relative z-10 w-full lg:w-auto lg:flex-1 lg:min-w-0">
 
         {/* LEFT PANEL — Opponent Info + Controls */}
-        <div className="hidden md:flex flex-col w-64 gap-4 relative z-10">
+        <div className="hidden lg:flex flex-col w-64 gap-4 relative z-10">
           
           {/* Opponent Card */}
           <div className="glass-card rounded-2xl p-5" style={{ border: '1px solid rgba(16, 185, 129, 0.15)' }}>
@@ -291,6 +291,19 @@ const OnlineGame = () => {
                 : 'bg-[#e8b34b]/20 text-[#e8b34b]'
             }`}>
               {gameStatus === 'active' ? turnLabel : gameStatus}
+            </div>
+          </div>
+
+          {/* Player Card (You) */}
+          <div className="glass-card rounded-2xl p-5" style={{ border: '1px solid rgba(255, 255, 255, 0.06)' }}>
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-xl overflow-hidden bg-gradient-to-br from-gray-700 to-gray-900 flex items-center justify-center border border-white/10">
+                <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=Player&backgroundColor=transparent`} alt="Player" className="w-full h-full" />
+              </div>
+              <div>
+                <h3 className="text-sm font-bold text-white font-['Montserrat']">You</h3>
+                <span className="text-gray-400 text-xs font-semibold capitalize">{onlineColor}</span>
+              </div>
             </div>
           </div>
 
@@ -347,10 +360,10 @@ const OnlineGame = () => {
         {/* ========================================================= */}
         {/* CENTER COLUMN (Responsive)                                */}
         {/* ========================================================= */}
-        <div className="flex flex-col items-center justify-center gap-0 md:gap-4 relative z-10 w-full md:w-auto md:flex-1 md:min-w-0 flex-1">
+        <div className="flex flex-col items-center justify-center gap-0 lg:gap-4 relative z-10 w-full lg:w-auto lg:flex-1 lg:min-w-0 flex-1">
           
           {/* MOBILE-ONLY: OPPONENT ROW (Tier 3) */}
-          <div className="flex md:hidden w-full px-4 items-center justify-between py-2 z-20">
+          <div className="flex lg:hidden w-full px-4 items-center justify-between py-2 z-20">
              <div className="flex items-center gap-3">
                <div className="w-10 h-10 rounded-md overflow-hidden bg-emerald-500/20 flex items-center justify-center border border-emerald-500/30 shadow-sm relative">
                  <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${opponentName}&backgroundColor=transparent`} alt="Opponent" className="w-full h-full object-cover" />
@@ -367,27 +380,27 @@ const OnlineGame = () => {
                  <span className="text-[11px] text-emerald-400 font-medium leading-tight">{opponentElo} ELO</span>
                </div>
              </div>
-             <div className="glass-panel px-3 py-1.5 rounded-lg border border-white/5 bg-black/50 shadow-inner min-w-[70px] flex justify-center">
+             <div className="flex justify-center min-w-[70px]">
                <ChessClock mode="top" />
              </div>
           </div>
 
           {/* Board + Desktop Clock Container */}
-          <div className="flex items-stretch justify-center gap-3 md:gap-4 w-full">
+          <div className="flex items-stretch justify-center gap-3 lg:gap-4 w-full">
             {/* Board Wrapper */}
-            <div className="flex flex-col justify-center min-w-0 w-full max-w-[100vw] md:max-w-[min(100vw-32px,65vh)] md:w-[min(95vh,calc(100%-110px))]">
-              <div className="w-full aspect-square relative drop-shadow-2xl md:drop-shadow-none z-10">
+            <div className="board-wrapper flex flex-col justify-center min-w-0" style={{ width: 'min(95vh, calc(100% - 110px))' }}>
+              <div className="w-full aspect-square relative">
                 <Board />
               </div>
             </div>
             {/* Desktop Clock */}
-            <div className="hidden md:flex flex-col justify-between flex-shrink-0 w-[90px] py-1 shadow-lg md:shadow-none bg-black/20 md:bg-transparent rounded-lg">
+            <div className="hidden lg:flex flex-col justify-between flex-shrink-0 w-[90px] py-1">
               <ChessClock className="h-full justify-between" />
             </div>
           </div>
 
           {/* MOBILE-ONLY: PLAYER ROW (Tier 5) */}
-          <div className="flex md:hidden w-full px-4 items-center justify-between py-2 z-20 mt-auto md:mt-0">
+          <div className="flex lg:hidden w-full px-4 items-center justify-between py-2 z-20">
              <div className="flex items-center gap-3">
                <div className="w-10 h-10 rounded-md overflow-hidden bg-gradient-to-br from-gray-700 to-gray-900 flex items-center justify-center border border-white/10 shadow-sm">
                  <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=Player&backgroundColor=transparent`} alt="Player" className="w-full h-full" />
@@ -399,15 +412,17 @@ const OnlineGame = () => {
                  <span className="text-[11px] text-gray-400 font-medium leading-tight capitalize">{onlineColor}</span>
                </div>
              </div>
-             <div className="glass-panel px-3 py-1.5 rounded-lg border border-white/5 bg-black/50 shadow-inner min-w-[70px] flex justify-center">
+             <div className="flex justify-center min-w-[70px]">
                <ChessClock mode="bottom" />
              </div>
           </div>
 
+
+
         </div>
 
         {/* RIGHT PANEL — Move List */}
-        <div className="hidden md:flex flex-col w-64 h-[600px] glass-card rounded-2xl p-6 relative z-10" style={{ border: '1px solid rgba(255, 255, 255, 0.06)' }}>
+        <div className="hidden lg:flex flex-col w-64 h-[600px] glass-card rounded-2xl p-6 relative z-10" style={{ border: '1px solid rgba(255, 255, 255, 0.06)' }}>
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-[10px] font-bold text-emerald-400 uppercase tracking-[0.3em] font-['Montserrat']">Move Log</h2>
             <div className="flex items-center gap-1">
@@ -483,7 +498,7 @@ const OnlineGame = () => {
       {/* ========================================================= */}
       {/* MOBILE-ONLY: BOTTOM NAV BAR (Tier 6)                        */}
       {/* ========================================================= */}
-      <div className="flex md:hidden w-full h-16 shrink-0 bg-[#0a0a0a] border-t border-white/5 items-center justify-between px-2 pb-safe z-40 shadow-[0_-4px_20px_rgba(0,0,0,0.5)] absolute bottom-0">
+      <div className="flex lg:hidden w-full h-16 shrink-0 bg-[#0a0a0a] border-t border-white/5 items-center justify-between px-2 pb-safe z-40 shadow-[0_-4px_20px_rgba(0,0,0,0.5)] absolute bottom-0">
         <button onClick={() => setShowMobileOptions(true)} className="flex flex-col items-center justify-center w-14 h-full text-gray-400 hover:text-white transition-colors">
           <div className="flex flex-col gap-1 items-center justify-center w-5 h-5 mb-1">
             <div className="w-4 h-[2px] bg-current rounded-full" />
@@ -516,7 +531,7 @@ const OnlineGame = () => {
 
       {/* Mobile Options Modal */}
       {showMobileOptions && (
-        <div className="md:hidden fixed inset-0 z-50 flex flex-col justify-end pointer-events-none">
+        <div className="lg:hidden fixed inset-0 z-50 flex flex-col justify-end pointer-events-none">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm pointer-events-auto transition-opacity" onClick={() => setShowMobileOptions(false)} />
           <div className="w-full glass-panel rounded-t-2xl p-4 flex flex-col gap-2 pointer-events-auto animate-in slide-in-from-bottom-2 duration-200 border-t border-white/10 shadow-[0_-10px_40px_rgba(0,0,0,0.5)]">
             <div className="w-12 h-1 bg-white/20 rounded-full mx-auto mb-2" />

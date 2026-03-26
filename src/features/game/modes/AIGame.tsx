@@ -251,7 +251,7 @@ const AIGame = () => {
 
   return (
     <div 
-      className="w-[100vw] h-[100dvh] md:w-full md:h-full flex flex-col md:flex-row items-center justify-start md:justify-center md:p-4 gap-0 md:gap-6 relative overflow-hidden text-white sm:text-gray-900"
+      className="w-[100vw] h-[100dvh] lg:w-full lg:h-full flex flex-col lg:flex-row items-center justify-start lg:justify-center lg:p-4 gap-0 lg:gap-6 relative overflow-hidden text-white"
       style={{
         background: 'linear-gradient(135deg, #0a0a0a 0%, #0f0f1a 30%, #0a0a0a 60%, #0f0f1a 100%)',
       }}
@@ -265,7 +265,7 @@ const AIGame = () => {
       {/* ========================================================= */}
       {/* MOBILE-ONLY: TOP APP HEADER (Tier 1)                      */}
       {/* ========================================================= */}
-      <div className="flex md:hidden w-full h-14 shrink-0 items-center justify-between px-4 z-40 bg-black/40 border-b border-white/5">
+      <div className="flex lg:hidden w-full h-14 shrink-0 items-center justify-between px-4 z-40 bg-black/40 border-b border-white/5">
         <button 
           onClick={() => {
             if (gameStatus === 'active' && history.length > 0) setShowResignConfirm(true);
@@ -328,7 +328,7 @@ const AIGame = () => {
       />
       
       {/* Left Panel: Info */}
-      <div className="hidden md:flex flex-col w-64 min-h-[600px] h-fit glass-card rounded-2xl p-6 relative z-10">
+      <div className="hidden lg:flex flex-col w-64 min-h-[600px] h-fit glass-card rounded-2xl p-6 relative z-10">
         {/* Back Button */}
         <button 
           onClick={() => {
@@ -378,6 +378,29 @@ const AIGame = () => {
             </div>
           </div>
           <CapturedPieces color={playerColor === 'white' ? 'white' : 'black'} className="mt-3" />
+        </div>
+
+        <div className="border-t border-white/5 my-1" />
+
+        {/* Player Info (You) */}
+        <div className="mb-6">
+          <h2 className="text-[10px] font-bold text-gray-400 mb-4 uppercase tracking-[0.3em] font-['Montserrat']">You</h2>
+          <div className="flex items-center gap-3">
+            <div 
+              className="w-12 h-12 rounded-xl overflow-hidden flex items-center justify-center transition-all duration-500"
+              style={{
+                background: 'linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02))',
+                border: '1px solid rgba(255,255,255,0.1)',
+              }}
+            >
+              <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${playerColor}&backgroundColor=transparent`} alt="Player" className="w-full h-full" />
+            </div>
+            <div>
+              <p className="font-bold text-white text-sm font-['Montserrat']">Player</p>
+              <p className="text-xs font-semibold uppercase tracking-wider text-gray-400 capitalize">{playerColor}</p>
+            </div>
+          </div>
+          <CapturedPieces color={playerColor === 'white' ? 'black' : 'white'} className="mt-3" />
         </div>
 
         {/* Evaluation Bar */}
@@ -504,10 +527,10 @@ const AIGame = () => {
       {/* ========================================================= */}
       {/* CENTER COLUMN (Responsive)                                */}
       {/* ========================================================= */}
-      <div className="flex flex-col items-center justify-center gap-0 md:gap-4 relative z-10 w-full md:w-auto md:flex-1 md:min-w-0 flex-1">
+      <div className="flex flex-col items-center justify-center gap-0 lg:gap-4 relative z-10 w-full lg:w-auto lg:flex-1 lg:min-w-0 flex-1">
         
         {/* MOBILE-ONLY: OPPONENT ROW (Tier 3) */}
-        <div className="flex md:hidden w-full px-4 items-center justify-between py-2 z-20">
+        <div className="flex lg:hidden w-full px-4 items-center justify-between py-2 z-20">
            <div className="flex items-center gap-3">
              <div className="w-10 h-10 rounded-md overflow-hidden bg-white/10 flex items-center justify-center border border-white/10 shadow-sm">
                {difficulty === 'custom' && customBot ? <img src={customBot.avatar} alt="Bot" className="w-full h-full object-cover" /> : <Bot className="w-6 h-6 text-[#e8b34b]" />}
@@ -520,27 +543,51 @@ const AIGame = () => {
                <span className="text-[11px] text-[#e8b34b] font-medium leading-tight">{opponentLabel}</span>
              </div>
            </div>
-           <div className="glass-panel px-3 py-1.5 rounded-lg border border-white/5 bg-black/50 shadow-inner min-w-[70px] flex justify-center">
+           <div className="flex justify-center min-w-[70px]">
              <ChessClock mode="top" />
            </div>
         </div>
 
+        {/* MOBILE-ONLY: Horizontal Evaluation Bar (Tier 3.5) */}
+        {showEvalBar && (
+          <div className="lg:hidden w-full px-4 mt-1 mb-1 relative z-20">
+            <div className="flex justify-between items-center text-[9px] font-bold mb-1 px-1">
+              <span className="text-gray-500">Black</span>
+              <span className={displayMate !== null ? (displayEval > 0 ? 'text-[#e8b34b]' : 'text-gray-400') : displayEval > 0 ? 'text-[#e8b34b]' : displayEval < 0 ? 'text-gray-400' : 'text-gray-500'}>
+                {displayMate !== null ? (displayMate === 0 ? 'Checkmate' : `M${displayMate}`) : (displayEval > 0 ? `+${(displayEval/100).toFixed(1)}` : (displayEval/100).toFixed(1))}
+              </span>
+              <span className="text-[#e8b34b]">White</span>
+            </div>
+            <div className="h-1.5 w-full bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 rounded-full overflow-hidden relative border border-white/5 shadow-inner">
+              <div 
+                className={`absolute top-0 bottom-0 transition-all duration-1000 ease-out rounded-full ${(displayMate !== null && displayEval > 0) || (displayMate === null && displayEval > 0) ? 'bg-gradient-to-r from-[#e8b34b] to-[#d4a03d]' : 'bg-gradient-to-l from-gray-500 to-gray-600'}`}
+                style={{ 
+                  width: displayMate !== null ? '50%' : `${Math.min(50, Math.abs(displayEval) / 20)}%`,
+                  left: displayEval > 0 ? '50%' : undefined,
+                  right: displayEval < 0 ? '50%' : undefined,
+                }} 
+              />
+              <div className="absolute top-0 bottom-0 left-1/2 w-[2px] bg-white/20" />
+            </div>
+          </div>
+        )}
+
         {/* Board + Desktop Clock Container */}
-        <div className="flex items-stretch justify-center gap-3 md:gap-4 w-full">
+        <div className="flex items-stretch justify-center gap-3 lg:gap-4 w-full">
           {/* Board Wrapper */}
-          <div className="flex flex-col justify-center min-w-0 w-full max-w-[100vw] md:max-w-[min(100vw-32px,65vh)] md:w-[min(95vh,calc(100%-110px))]">
-            <div className="w-full aspect-square relative drop-shadow-2xl md:drop-shadow-none z-10">
+          <div className="board-wrapper flex flex-col justify-center min-w-0" style={{ width: 'min(95vh, calc(100% - 110px))' }}>
+            <div className="w-full aspect-square relative">
               <Board />
             </div>
           </div>
           {/* Desktop Clock */}
-          <div className="hidden md:flex flex-col justify-between flex-shrink-0 w-[90px] py-1 shadow-lg md:shadow-none bg-black/20 md:bg-transparent rounded-lg">
+          <div className="hidden lg:flex flex-col justify-between flex-shrink-0 w-[90px] py-1">
             <ChessClock className="h-full justify-between" />
           </div>
         </div>
 
         {/* MOBILE-ONLY: PLAYER ROW (Tier 5) */}
-        <div className="flex md:hidden w-full px-4 items-center justify-between py-2 z-20 mt-auto md:mt-0">
+        <div className="flex lg:hidden w-full px-4 items-center justify-between py-2 z-20">
            <div className="flex items-center gap-3">
              <div className="w-10 h-10 rounded-md overflow-hidden bg-gradient-to-br from-gray-700 to-gray-900 flex items-center justify-center border border-white/10 shadow-sm">
                <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${playerColor}&backgroundColor=transparent`} alt="Player" className="w-full h-full" />
@@ -553,10 +600,12 @@ const AIGame = () => {
                <span className="text-[11px] text-gray-400 font-medium leading-tight capitalize">{playerColor}</span>
              </div>
            </div>
-           <div className="glass-panel px-3 py-1.5 rounded-lg border border-white/5 bg-black/50 shadow-inner min-w-[70px] flex justify-center">
+           <div className="flex justify-center min-w-[70px]">
              <ChessClock mode="bottom" />
            </div>
         </div>
+
+
 
       </div>
 
@@ -594,7 +643,7 @@ const AIGame = () => {
       )}
       
       {/* Right Panel: Moves */}
-      <div className="hidden md:flex flex-col w-64 h-[600px] glass-card rounded-2xl p-6 relative z-10">
+      <div className="hidden lg:flex flex-col w-64 h-[600px] glass-card rounded-2xl p-6 relative z-10">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-[10px] font-bold text-[#e8b34b] uppercase tracking-[0.3em] font-['Montserrat']">Move Log</h2>
           <div className="flex items-center gap-1">
@@ -667,7 +716,7 @@ const AIGame = () => {
       {/* ========================================================= */}
       {/* MOBILE-ONLY: BOTTOM NAV BAR (Tier 6)                        */}
       {/* ========================================================= */}
-      <div className="flex md:hidden w-full h-16 shrink-0 bg-[#0a0a0a] border-t border-white/5 items-center justify-between px-2 pb-safe z-40 shadow-[0_-4px_20px_rgba(0,0,0,0.5)]">
+      <div className="flex lg:hidden w-full h-16 shrink-0 bg-[#0a0a0a] border-t border-white/5 items-center justify-between px-2 pb-safe z-40 shadow-[0_-4px_20px_rgba(0,0,0,0.5)]">
         <button onClick={() => setShowMobileOptions(true)} className="flex flex-col items-center justify-center w-14 h-full text-gray-400 hover:text-white transition-colors">
           <div className="flex flex-col gap-1 items-center justify-center w-5 h-5 mb-1">
             <div className="w-4 h-[2px] bg-current rounded-full" />
@@ -700,7 +749,7 @@ const AIGame = () => {
 
       {/* Mobile Options Modal */}
       {showMobileOptions && (
-        <div className="md:hidden fixed inset-0 z-50 flex flex-col justify-end pointer-events-none">
+        <div className="lg:hidden fixed inset-0 z-50 flex flex-col justify-end pointer-events-none">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm pointer-events-auto transition-opacity" onClick={() => setShowMobileOptions(false)} />
           <div className="w-full glass-panel rounded-t-2xl p-4 flex flex-col gap-2 pointer-events-auto animate-in slide-in-from-bottom-2 duration-200 border-t border-white/10 shadow-[0_-10px_40px_rgba(0,0,0,0.5)]">
             <div className="w-12 h-1 bg-white/20 rounded-full mx-auto mb-2" />
