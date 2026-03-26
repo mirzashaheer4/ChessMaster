@@ -251,7 +251,7 @@ const AIGame = () => {
 
   return (
     <div 
-      className="w-[100vw] h-[100dvh] lg:w-full lg:h-full flex flex-col lg:flex-row items-center justify-start lg:justify-center lg:p-4 gap-0 lg:gap-6 relative overflow-hidden text-white"
+      className="w-[100vw] min-h-[100dvh] lg:w-full lg:min-h-screen flex flex-col lg:flex-row items-center justify-start lg:justify-center lg:p-4 gap-0 lg:gap-6 relative overflow-x-hidden overflow-y-auto text-white custom-scrollbar"
       style={{
         background: 'linear-gradient(135deg, #0a0a0a 0%, #0f0f1a 30%, #0a0a0a 60%, #0f0f1a 100%)',
       }}
@@ -328,7 +328,7 @@ const AIGame = () => {
       />
       
       {/* Left Panel: Info */}
-      <div className="hidden lg:flex flex-col w-64 min-h-[600px] h-fit glass-card rounded-2xl p-6 relative z-10">
+      <div className="hidden lg:flex flex-col w-64 min-h-[600px] h-fit glass-card rounded-2xl p-5 relative z-10 my-auto">
         {/* Back Button */}
         <button 
           onClick={() => {
@@ -438,11 +438,6 @@ const AIGame = () => {
               <p className="text-[#d4a03d] text-xs uppercase tracking-wider font-semibold mt-1">
                 {getGameResult() === 'win' ? 'Victory!' : 'Defeated'}
               </p>
-              {reviewIndex === -1 && (
-                <button onClick={() => { startReview(); useGameStore.getState().saveReviewState(); navigate('/review?source=game'); }} className="btn-outline w-full mt-3 py-2 rounded-lg text-xs">
-                  Review Game & Analysis
-                </button>
-              )}
             </div>
           )}
           

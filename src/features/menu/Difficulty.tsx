@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 
 import { useNavigate } from 'react-router-dom';
+import WebGLParticleBackground from '../../core/components/WebGLParticleBackground';
 
 const levels: { id: Difficulty; label: string; desc: string; icon: React.FC<{ className?: string; color?: string }>; color: string; glow: string }[] = [
   { id: 'easy', label: 'Beginner', desc: 'A gentle start. Mistakes are forgiven. Perfect for learning the basics.', icon: Snowflake, color: '#4ade80', glow: 'rgba(74, 222, 128, 0.3)' },
@@ -26,34 +27,7 @@ const levels: { id: Difficulty; label: string; desc: string; icon: React.FC<{ cl
 ];
 
 // Particle Background
-const ParticleBackground = ({ color = 'rgba(139, 92, 246, 0.4)' }: { color?: string }) => {
-  const particles = Array.from({ length: 20 }, (_, i) => ({
-    id: i,
-    left: `${Math.random() * 100}%`,
-    delay: `${Math.random() * 20}s`,
-    duration: `${15 + Math.random() * 10}s`,
-    size: `${2 + Math.random() * 3}px`,
-  }));
-
-  return (
-    <div className="particles-bg pointer-events-none">
-      {particles.map((p) => (
-        <div
-          key={p.id}
-          className="particle"
-          style={{
-            left: p.left,
-            animationDelay: p.delay,
-            animationDuration: p.duration,
-            width: p.size,
-            height: p.size,
-            background: color,
-          }}
-        />
-      ))}
-    </div>
-  );
-};
+// Migrated to WebGLParticleBackground
 
 // Extracted Card Component
 const DifficultyCard = ({ level, i, isActive, isFaded, onClick, onMouseEnter, onMouseLeave }: any) => {
@@ -214,7 +188,7 @@ const DifficultyScreen = () => {
       }}
     >
       {/* Background Effects */}
-      <ParticleBackground color={activeColor.replace('rgb', 'rgba').replace(')', ', 0.4)')} />
+      <WebGLParticleBackground color={activeColor.replace('rgb', 'rgba').replace(')', ', 0.4)')} />
       <div className="absolute inset-0 pointer-events-none">
         <div 
           className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full blur-[100px] transition-colors duration-700"

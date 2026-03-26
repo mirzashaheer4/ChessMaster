@@ -17,6 +17,7 @@ import {
 import { useAuthStore } from '../../core/store/auth';
 
 import { useNavigate } from 'react-router-dom';
+import WebGLParticleBackground from '../../core/components/WebGLParticleBackground';
 
 // ─── Floating Chess Piece ─────────────────────────────────────────
 const FloatingPiece = ({ 
@@ -33,33 +34,7 @@ const FloatingPiece = ({
 );
 
 // ─── Particle Background ──────────────────────────────────────────
-const ParticleBackground = () => {
-  const particles = Array.from({ length: 30 }, (_, i) => ({
-    id: i,
-    left: `${Math.random() * 100}%`,
-    delay: `${Math.random() * 20}s`,
-    duration: `${15 + Math.random() * 10}s`,
-    size: `${2 + Math.random() * 3}px`,
-  }));
-
-  return (
-    <div className="particles-bg">
-      {particles.map((p) => (
-        <div
-          key={p.id}
-          className="particle"
-          style={{
-            left: p.left,
-            animationDelay: p.delay,
-            animationDuration: p.duration,
-            width: p.size,
-            height: p.size,
-          }}
-        />
-      ))}
-    </div>
-  );
-};
+// Migrated to WebGLParticleBackground
 
 // ─── Navbar ───────────────────────────────────────────────────────
 const Navbar = () => {
@@ -216,7 +191,7 @@ const HeroSection = () => {
     />
     
     {/* Particle Background */}
-    <ParticleBackground />
+    <WebGLParticleBackground />
     
     {/* Floating Chess Pieces */}
     <FloatingPiece src="/landing/chess-king.png" className="w-24 md:w-40 opacity-60 pointer-events-none" style={{ top: '15%', left: '5%', animationDelay: '0s' }} />

@@ -3,6 +3,7 @@ import { ArrowLeft, User, Bot, Swords, History, ChevronRight, ChevronLeft, Globe
 
 import { useNavigate } from 'react-router-dom';
 import { useGameStore } from '../../core/store/game';
+import WebGLParticleBackground from '../../core/components/WebGLParticleBackground';
 
 // ─── Floating Chess Piece ─────────────────────────────────────────
 const FloatingPiece = ({ 
@@ -19,44 +20,7 @@ const FloatingPiece = ({
 );
 
 // ─── Particle Background ──────────────────────────────────────────
-const ParticleBackground = ({ theme = 'default', intensity = 1 }: { theme?: 'default' | 'pvp' | 'ai' | 'online' | 'dev', intensity?: number }) => {
-  const particles = Array.from({ length: 30 * intensity }, (_, i) => ({
-    id: i,
-    left: `${Math.random() * 100}%`,
-    delay: `${Math.random() * 20}s`,
-    duration: `${15 + Math.random() * 10}s`,
-    size: `${2 + Math.random() * 3}px`,
-  }));
-
-  const getColor = () => {
-    switch (theme) {
-      case 'pvp': return 'rgba(59, 130, 246, 0.4)';
-      case 'ai': return 'rgba(139, 92, 246, 0.4)';
-      case 'online': return 'rgba(16, 185, 129, 0.4)';
-      case 'dev': return 'rgba(239, 68, 68, 0.4)';
-      default: return 'rgba(232, 179, 75, 0.2)';
-    }
-  };
-
-  return (
-    <div className="particles-bg">
-      {particles.map((p) => (
-        <div
-          key={p.id}
-          className="particle"
-          style={{
-            left: p.left,
-            animationDelay: p.delay,
-            animationDuration: p.duration,
-            width: p.size,
-            height: p.size,
-            background: getColor(),
-          }}
-        />
-      ))}
-    </div>
-  );
-};
+// Migrated to WebGLParticleBackground
 
 import GameSetupModal from './ui/GameSetupModal';
 
@@ -348,7 +312,16 @@ export default function PlayMode() {
 
       {/* Theme-specific Particles */}
       <div className="fixed inset-0 pointer-events-none">
-        <ParticleBackground theme={activeThemeModeId as 'default'|'pvp'|'ai'|'online'|'dev'} intensity={activeThemeModeId === 'none' ? 1 : 1.5} />
+        <WebGLParticleBackground 
+          color={
+            activeThemeModeId === 'pvp' ? 'rgba(59, 130, 246, 0.4)' :
+            activeThemeModeId === 'ai' ? 'rgba(139, 92, 246, 0.4)' :
+            activeThemeModeId === 'online' ? 'rgba(16, 185, 129, 0.4)' :
+            activeThemeModeId === 'dev' ? 'rgba(239, 68, 68, 0.4)' :
+            'rgba(232, 179, 75, 0.2)'
+          }
+          intensity={activeThemeModeId === 'none' ? 1 : 1.5} 
+        />
       </div>
 
       {/* Floating Pieces with Parallax */}

@@ -197,7 +197,7 @@ const LocalGame = () => {
 
   return (
     <div 
-      className="w-full h-full flex flex-col md:flex-row items-center justify-center p-4 gap-6 relative overflow-hidden"
+      className="w-full min-h-[100dvh] flex flex-col md:flex-row items-center justify-center p-4 gap-6 relative overflow-x-hidden overflow-y-auto custom-scrollbar"
       style={{
         background: 'linear-gradient(135deg, #0a0a0a 0%, #0f0f1a 30%, #0a0a0a 60%, #0f0f1a 100%)',
       }}
@@ -266,7 +266,7 @@ const LocalGame = () => {
       )}
       
       {/* Left Panel: Info */}
-      <div className="hidden md:flex flex-col w-64 min-h-[600px] h-fit glass-card rounded-2xl p-6 relative z-10">
+      <div className="hidden md:flex flex-col w-64 min-h-[600px] h-fit glass-card rounded-2xl p-5 relative z-10 my-auto">
         {/* Back Button */}
         <button 
           onClick={() => {

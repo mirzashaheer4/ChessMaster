@@ -179,7 +179,7 @@ const OnlineGame = () => {
   // ── Main Game View ──
   return (
     <div
-      className="w-[100vw] h-[100dvh] lg:w-full lg:h-full flex flex-col lg:flex-row items-center justify-start lg:justify-center lg:p-4 gap-0 lg:gap-6 relative overflow-hidden text-white"
+      className="w-[100vw] min-h-[100dvh] lg:w-full lg:min-h-screen flex flex-col lg:flex-row items-center justify-start lg:justify-center lg:p-4 gap-0 lg:gap-6 relative overflow-x-hidden overflow-y-auto text-white custom-scrollbar"
       style={{
         background: 'linear-gradient(135deg, #0a0a0a 0%, #0d1117 40%, #0a0a0a 100%)',
       }}
