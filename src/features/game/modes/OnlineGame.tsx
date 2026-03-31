@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from 'react';
 import { Board } from '../board/Board';
 import { useGameStore } from '../../../core/store/game';
 import { useGameState, useSettings } from '../../../core/store/selectors';
+import { useAuthStore } from '../../../core/store/auth';
 import { useGameTimer } from '../../../core/hooks/useGameTimer';
 import { audio } from '../../../core/audio/audio';
 import GameOverModal from '../ui/GameOverModal';
@@ -29,6 +30,7 @@ import { useNavigate } from 'react-router-dom';
  */
 const OnlineGame = () => {
   const { gameStatus, history, game } = useGameState();
+  const { user } = useAuthStore();
   const { flipBoard } = useSettings();
   
   const {
@@ -301,7 +303,7 @@ const OnlineGame = () => {
                 <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=Player&backgroundColor=transparent`} alt="Player" className="w-full h-full" />
               </div>
               <div>
-                <h3 className="text-sm font-bold text-white font-['Montserrat']">You</h3>
+                <h3 className="text-sm font-bold text-white font-['Montserrat']">{user?.username || 'You'}</h3>
                 <span className="text-gray-400 text-xs font-semibold capitalize">{onlineColor}</span>
               </div>
             </div>
@@ -407,7 +409,7 @@ const OnlineGame = () => {
                </div>
                <div className="flex flex-col">
                  <div className="flex items-center gap-2">
-                   <span className="text-sm font-bold text-white leading-tight">You</span>
+                   <span className="text-sm font-bold text-white leading-tight">{user?.username || 'You'}</span>
                  </div>
                  <span className="text-[11px] text-gray-400 font-medium leading-tight capitalize">{onlineColor}</span>
                </div>

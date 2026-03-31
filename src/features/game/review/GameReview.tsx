@@ -299,30 +299,30 @@ export const GameReview = () => {
         </button>
       </div>
 
-      {/* Main 3-Column Layout */}
-      <div className="flex-1 flex gap-4 min-h-0 w-full relative z-10 pt-16 md:pt-0">
-        {/* Left: Evaluation Bar */}
-        <div className="w-10 flex-shrink-0 flex items-center">
-          <EvaluationBar 
-            evaluation={reviewEval} 
-            mateIn={reviewMate}
-            playerColor={playerColor || 'white'}
-          />
-        </div>
+      {/* Main Layout Area */}
+      <div className="flex-1 flex flex-col lg:flex-row items-center justify-start lg:justify-center gap-4 lg:gap-6 w-full relative z-10 pt-16 md:pt-0 overflow-y-auto custom-scrollbar overflow-x-hidden">
         
-        {/* Center: Board */}
-        <div className="flex-1 flex flex-col items-center justify-center min-h-0">
-          <div className="flex-1 min-h-0 w-full flex items-center justify-center">
-            <div className="flex flex-col justify-center min-w-0" style={{ width: 'min(95vh, 100%)' }}>
-              <div className="w-full aspect-square relative">
-                <Board />
-              </div>
+        {/* Board + Eval Area */}
+        <div className="flex items-stretch justify-center gap-2 lg:gap-4 w-full lg:w-auto">
+          {/* Left: Evaluation Bar */}
+          <div className="w-6 md:w-10 flex-shrink-0 flex items-center">
+            <EvaluationBar 
+              evaluation={reviewEval} 
+              mateIn={reviewMate}
+              playerColor={playerColor || 'white'}
+            />
+          </div>
+          
+          {/* Center: Board */}
+          <div className="board-wrapper flex flex-col justify-center min-w-0" style={{ width: 'min(95vh, calc(100% - 40px))' }}>
+            <div className="w-full aspect-square relative">
+              <Board />
             </div>
           </div>
         </div>
         
         {/* Right: Analysis Panel */}
-        <div className="w-[320px] lg:w-[360px] flex-shrink-0 flex flex-col gap-4 min-h-0">
+        <div className="w-[100%] max-w-[400px] lg:w-[360px] flex-shrink-0 flex flex-col gap-4 min-h-[500px] lg:min-h-0 pb-6 lg:pb-0">
           
           {/* Game Review Header (Moved from Center) */}
           <div className="glass-card p-4 rounded-xl flex flex-col gap-3 flex-shrink-0" style={{ border: '1px solid rgba(232, 179, 75, 0.1)' }}>

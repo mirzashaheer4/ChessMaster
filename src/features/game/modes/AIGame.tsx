@@ -4,6 +4,7 @@ import { ThemeSelection } from '../ui/ThemeSelection';
 import { AnimatePresence } from 'framer-motion';
 import { useGameStore } from '../../../core/store/game';
 import { useGameState, useEval, useReview, useClocks, useSettings, useGameActions } from '../../../core/store/selectors';
+import { useAuthStore } from '../../../core/store/auth';
 import { useChessAI } from '../../../core/hooks/useChessAI';
 import { useKeyboardNavigation } from '../../../core/hooks/useKeyboardNavigation';
 import { useGameTimer } from '../../../core/hooks/useGameTimer';
@@ -38,6 +39,7 @@ import { useNavigate } from 'react-router-dom';
  * Player vs Stockfish AI with premium glassmorphism design
  */
 const AIGame = () => {
+  const { user } = useAuthStore();
   const { gameStatus, history, game } = useGameState();
   const { evaluation, mateIn } = useEval();
   const { reviewIndex, startReview } = useReview();
@@ -396,7 +398,7 @@ const AIGame = () => {
               <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${playerColor}&backgroundColor=transparent`} alt="Player" className="w-full h-full" />
             </div>
             <div>
-              <p className="font-bold text-white text-sm font-['Montserrat']">Player</p>
+              <p className="font-bold text-white text-sm font-['Montserrat']">{user?.username || 'Player'}</p>
               <p className="text-xs font-semibold uppercase tracking-wider text-gray-400 capitalize">{playerColor}</p>
             </div>
           </div>
@@ -589,7 +591,7 @@ const AIGame = () => {
              </div>
              <div className="flex flex-col">
                <div className="flex items-center gap-2">
-                 <span className="text-sm font-bold text-white leading-tight">You</span>
+                 <span className="text-sm font-bold text-white leading-tight">{user?.username || 'You'}</span>
                  {displayEval > 0 && <span className="text-[10px] font-bold text-gray-900 bg-white/80 px-1 rounded-sm leading-tight tracking-wider">+{(Math.abs(displayEval)/100).toFixed(1)}</span>}
                </div>
                <span className="text-[11px] text-gray-400 font-medium leading-tight capitalize">{playerColor}</span>
