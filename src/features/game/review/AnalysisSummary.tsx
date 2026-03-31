@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
+import { ChevronDown, ChevronUp } from 'lucide-react';
 import type { MoveAnalysis, MoveClassification } from '../../../core/utils/analysisEngine';
 
 interface AnalysisSummaryProps {
@@ -76,9 +77,9 @@ const AccuracyGauge: React.FC<{
   
   return (
     <div className="flex flex-col items-center">
-      <div className="relative w-24 h-24">
+      <div className="relative w-14 h-14 lg:w-24 lg:h-24">
         {/* Background circle */}
-        <svg className="w-full h-full transform -rotate-90">
+        <svg className="w-full h-full transform -rotate-90" viewBox="0 0 96 96">
           <circle
             cx="48"
             cy="48"
@@ -105,11 +106,11 @@ const AccuracyGauge: React.FC<{
         
         {/* Accuracy text */}
         <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <span className="text-2xl font-bold text-white">{accuracy}</span>
-          <span className="text-xs text-gray-400">%</span>
+          <span className="text-sm lg:text-2xl font-bold text-white leading-tight">{accuracy}</span>
+          <span className="text-[9px] lg:text-xs text-gray-400 leading-tight">%</span>
         </div>
       </div>
-      <span className="mt-2 text-sm font-medium text-gray-300">{label}</span>
+      <span className="mt-1 lg:mt-2 text-[10px] lg:text-sm font-medium text-gray-300">{label}</span>
     </div>
   );
 };
@@ -144,6 +145,7 @@ export const AnalysisSummary: React.FC<AnalysisSummaryProps> = ({
   const playerAccuracy = calculateAccuracy(analysis, isWhite);
   const opponentAccuracy = calculateAccuracy(analysis, !isWhite);
   const counts = countByClassification(analysis, isWhite);
+  const [isExpanded, setIsExpanded] = useState(false);
   
   // Determine accuracy color
   const getAccuracyColor = (acc: number): string => {
@@ -154,9 +156,9 @@ export const AnalysisSummary: React.FC<AnalysisSummaryProps> = ({
   };
 
   return (
-    <div className="bg-black/40 rounded-xl p-4 backdrop-blur-sm border border-white/10">
+    <div className="bg-black/40 rounded-xl p-3 lg:p-4 backdrop-blur-sm border border-white/10 relative z-50">
       {/* Accuracy Section */}
-      <div className="flex justify-around mb-6">
+      <div className="flex justify-around mb-1 lg:mb-6">
         <AccuracyGauge 
           accuracy={playerAccuracy} 
           label="You" 
@@ -169,23 +171,39 @@ export const AnalysisSummary: React.FC<AnalysisSummaryProps> = ({
         />
       </div>
       
-      {/* Divider */}
-      <div className="h-px bg-gradient-to-r from-transparent via-white/20 to-transparent mb-4" />
+      {/* Mobile Accordion Toggle */}
+      <div className="lg:hidden flex justify-center -mb-2 mt-1">
+        <button 
+          onClick={() => setIsExpanded(!isExpanded)} 
+          className="p-1 text-gray-400 hover:text-[#e8b34b] transition-colors"
+        >
+          {isExpanded ? <ChevronUp className="w-5 h-5"/> : <ChevronDown className="w-5 h-5"/>}
+        </button>
+      </div>
       
-      {/* Move Breakdown */}
-      <h3 className="text-sm font-semibold text-gray-400 mb-2 uppercase tracking-wider">
-        Your Moves
-      </h3>
-      
-      <div className="space-y-0.5">
-        {counts.great > 0 && (
-          <BreakdownItem label="Great" count={counts.great} color="text-[#5c8bb0]" symbol="!" />
-        )}
-        <BreakdownItem label="Best" count={counts.best} color="text-[#96bc4b]" symbol="✓" />
-        <BreakdownItem label="Good" count={counts.good} color="text-[#96bc4b]/60" symbol="" />
-        <BreakdownItem label="Inaccuracy" count={counts.inaccuracy} color="text-[#f7c631]" symbol="?!" />
-        <BreakdownItem label="Mistake" count={counts.mistake} color="text-[#e58f2a]" symbol="?" />
-        <BreakdownItem label="Blunder" count={counts.blunder} color="text-[#ca3431]" symbol="??" />
+      {/* Breakdown Area */}
+      <div className={`
+        lg:block /* Always visible on desktop */
+        ${isExpanded ? 'block absolute top-full left-0 w-full mt-2 bg-[#0a0a0a]/95 backdrop-blur-md rounded-xl border border-white/10 p-4 shadow-2xl z-50' : 'hidden'}
+      `}>
+        {/* Divider */}
+        <div className="h-px bg-gradient-to-r from-transparent via-white/20 to-transparent mb-4 hidden lg:block" />
+        
+        {/* Move Breakdown */}
+        <h3 className="text-[10px] lg:text-sm font-semibold text-gray-400 mb-2 uppercase tracking-wider">
+          Your Moves
+        </h3>
+        
+        <div className="space-y-0.5">
+          {counts.great > 0 && (
+            <BreakdownItem label="Great" count={counts.great} color="text-[#5c8bb0]" symbol="!" />
+          )}
+          <BreakdownItem label="Best" count={counts.best} color="text-[#96bc4b]" symbol="✓" />
+          <BreakdownItem label="Good" count={counts.good} color="text-[#96bc4b]/60" symbol="" />
+          <BreakdownItem label="Inaccuracy" count={counts.inaccuracy} color="text-[#f7c631]" symbol="?!" />
+          <BreakdownItem label="Mistake" count={counts.mistake} color="text-[#e58f2a]" symbol="?" />
+          <BreakdownItem label="Blunder" count={counts.blunder} color="text-[#ca3431]" symbol="??" />
+        </div>
       </div>
     </div>
   );
