@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useAuthStore } from '../../../core/store/auth';
 
 /**
  * Game Review Screen — ChessMaster Theme
@@ -29,6 +30,7 @@ export const GameReview = () => {
   const { history, startFen, castlingRights, historyLan } = useGameState();
   const { playerColor, chessType } = useSettings();
   const { currentGameAnalysis, setCurrentGameAnalysis } = useReview();
+  const { user } = useAuthStore();
   
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -289,7 +291,7 @@ export const GameReview = () => {
       </div>
 
       {/* Header - Made absolute to free up vertical space for 95vh board */}
-      <div className="absolute top-4 left-20 z-50">
+      <div className="absolute top-4 left-20 z-50 hidden lg:block">
         <button
           onClick={handleBack}
           className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors duration-300 group bg-black/40 backdrop-blur-sm px-4 py-2 rounded-xl border border-white/5"
@@ -413,7 +415,6 @@ export const GameReview = () => {
              </div>
           </div>
         </div>
-        </div>
       </div>
 
       {/* ============================================== */}
@@ -422,15 +423,18 @@ export const GameReview = () => {
       <div className="flex lg:hidden flex-col flex-1 w-full relative z-10 pt-4 md:pt-12 min-h-0 pb-2">
         
         {/* Top Header */}
-        <div className="flex items-center justify-between mb-2 shrink-0">
-            <h1 className="text-xl font-bold font-['Montserrat'] text-gold-gradient flex items-center gap-2">
-              <BarChart3 className="w-5 h-5 text-[#e8b34b]" /> Game Review
+        <div className="flex items-center gap-3 mb-2 shrink-0">
+            <button onClick={handleBack} className="p-1.5 rounded-lg text-gray-400 hover:text-white bg-white/5 border border-white/10" aria-label="Go Back">
+              <ArrowLeft className="w-5 h-5" />
+            </button>
+            <h1 className="text-lg font-bold font-['Montserrat'] text-gold-gradient flex items-center gap-2 flex-1 leading-none">
+              <BarChart3 className="w-4 h-4 text-[#e8b34b]" /> Review
             </h1>
             <div className="flex items-center gap-2">
               {(isEngineThinking || isAnalyzing) && (
                 <div className="w-4 h-4 rounded-full border-2 border-[#e8b34b]/30 border-t-[#e8b34b] animate-spin" title="Engine analyzing..." />
               )}
-              <button onClick={flipBoard} className="p-1.5 rounded-lg text-gray-400 hover:text-[#e8b34b] hover:bg-white/5 transition-colors" title="Flip Board">
+              <button onClick={flipBoard} className="p-1.5 rounded-lg text-gray-400 hover:text-[#e8b34b] bg-white/5 hover:bg-white/10 border border-white/10 transition-colors pointer-events-auto" title="Flip Board">
                 <RotateCw className="w-4 h-4" />
               </button>
             </div>
@@ -454,7 +458,11 @@ export const GameReview = () => {
 
         {/* Stats Panel (Accuracy Circles + Dropdown Overlay) */}
         <div className="mb-2 shrink-0 relative z-[60]">
-          <AnalysisSummary analysis={analysis} playerColor={playerColor || 'white'} />
+          <AnalysisSummary 
+            analysis={analysis} 
+            playerColor={playerColor || 'white'} 
+            playerName={user?.username || 'You'}
+          />
         </div>
 
         {/* Horizontal Evaluation Bar */}
@@ -485,170 +493,61 @@ export const GameReview = () => {
           </div>
         </div>
 
-        {/* Sliding Horizontal Move List */}
-        <div className="w-full h-12 my-2 shrink-0 overflow-x-auto whitespace-nowrap custom-scrollbar flex items-center bg-[#0a0a0a]/60 rounded-xl px-2 border border-white/10 relative z-10 shadow-inner">
+        {/* Sliding Horizontal Move List - Paired Format */}
+        <div className="w-full h-11 my-2 shrink-0 overflow-x-auto whitespace-nowrap custom-scrollbar flex items-center bg-[#0a0a0a]/60 rounded-xl px-3 border border-white/10 relative z-10 shadow-inner space-x-4">
            {history.length === 0 && <span className="text-gray-500 text-[11px] italic mx-auto">No moves yet...</span>}
-           {history.map((moveSAN, index) => {
-             const moveData = analysis[index];
-             const isActive = index === currentMoveIndex;
+           {Array.from({ length: Math.ceil(history.length / 2) }).map((_, i) => {
+             const whiteIndex = i * 2;
+             const blackIndex = i * 2 + 1;
              
-             let symbol = '';
-             let symbolColor = '';
-             if (moveData?.classification === 'great') { symbol = '!'; symbolColor = 'text-[#5c8bb0]'; }
-             else if (moveData?.classification === 'best') { symbol = '✓'; symbolColor = 'text-[#96bc4b]'; }
-             else if (moveData?.classification === 'inaccuracy') { symbol = '?!'; symbolColor = 'text-[#f7c631]'; }
-             else if (moveData?.classification === 'mistake') { symbol = '?'; symbolColor = 'text-[#e58f2a]'; }
-             else if (moveData?.classification === 'blunder') { symbol = '??'; symbolColor = 'text-[#ca3431]'; }
+             const renderMove = (index: number) => {
+               if (index >= history.length) return null;
+               const moveData = analysis[index];
+               const isActive = index === currentMoveIndex;
+               let symbol = '';
+               let symbolColor = '';
+               if (moveData?.classification === 'great') { symbol = '!'; symbolColor = 'text-[#5c8bb0]'; }
+               else if (moveData?.classification === 'best') { symbol = '✓'; symbolColor = 'text-[#96bc4b]'; }
+               else if (moveData?.classification === 'inaccuracy') { symbol = '?!'; symbolColor = 'text-[#f7c631]'; }
+               else if (moveData?.classification === 'mistake') { symbol = '?'; symbolColor = 'text-[#e58f2a]'; }
+               else if (moveData?.classification === 'blunder') { symbol = '??'; symbolColor = 'text-[#ca3431]'; }
+               
+               return (
+                 <button 
+                   key={index}
+                   id={isActive ? 'active-mobile-move' : ''}
+                   onClick={() => setCurrentMoveIndex(index)}
+                   className={`px-1.5 py-0.5 rounded text-sm font-mono font-bold transition-colors pointer-events-auto ${
+                     isActive ? 'bg-[#e8b34b] text-black shadow-[0_0_10px_rgba(232,179,75,0.4)]' : 'text-gray-300 hover:bg-white/10 hover:text-white'
+                   }`}
+                 >
+                   {history[index]}
+                   {symbol && <span className={`text-[10px] ml-[1px] ${isActive && symbolColor !== 'text-[#ca3431]' && symbolColor !== 'text-[#5c8bb0]' ? 'text-black font-extrabold' : symbolColor}`}>{symbol}</span>}
+                 </button>
+               );
+             };
              
-             // Auto-scroll logic: add id to active element
              return (
-                <button 
-                  key={index} 
-                  id={isActive ? 'active-mobile-move' : ''}
-                  onClick={() => setCurrentMoveIndex(index)}
-                  className={`flex-shrink-0 px-2.5 py-1.5 mx-1 rounded-lg text-sm font-mono font-bold transition-colors flex items-center gap-1 border border-transparent ${
-                    isActive ? 'bg-[#e8b34b] text-black shadow-[0_0_15px_rgba(232,179,75,0.4)] border-[#fcd34d]' : 'bg-white/5 text-gray-300 hover:bg-white/10'
-                  }`}
-                >
-                  <span className={isActive ? 'text-black/60 text-xs' : 'text-gray-500 text-xs'}>
-                    {index % 2 === 0 ? `${(index/2)+1}.` : ''}
-                  </span>
-                  <span>{moveSAN}</span>
-                  {symbol && <span className={`text-[10px] ${isActive && symbolColor !== 'text-[#ca3431]' && symbolColor !== 'text-[#5c8bb0]' ? 'text-black font-extrabold' : symbolColor}`}>{symbol}</span>}
-                </button>
-             )
+               <div key={i} className="flex items-center gap-1.5 shrink-0">
+                 <span className="text-gray-500 text-xs font-mono font-medium">{i + 1}.</span>
+                 {renderMove(whiteIndex)}
+                 {renderMove(blackIndex)}
+               </div>
+             );
            })}
         </div>
 
         {/* Navigation Arrows */}
         <div className="flex items-center justify-between gap-2 w-full shrink-0 relative z-10 mb-2">
-             <button onClick={goToStart} title="Start" className="p-3 md:p-4 rounded-xl text-gray-400 hover:text-[#e8b34b] transition-all bg-[#0a0a0a]/60 border border-white/10 flex-shrink-0"> <ChevronsLeft className="w-5 h-5" /> </button>
-             <button onClick={goToPrev} title="Previous" className="p-3 md:p-4 rounded-xl text-gray-400 hover:text-[#e8b34b] transition-all bg-[#0a0a0a]/60 border border-white/10 flex-shrink-0"> <ChevronLeft className="w-5 h-5" /> </button>
+             <button onClick={goToStart} title="Start" className="p-3 md:p-4 rounded-xl text-gray-400 hover:text-[#e8b34b] transition-all bg-[#0a0a0a]/60 border border-white/10 flex-shrink-0 pointer-events-auto"> <ChevronsLeft className="w-5 h-5" /> </button>
+             <button onClick={goToPrev} title="Previous" className="p-3 md:p-4 rounded-xl text-gray-400 hover:text-[#e8b34b] transition-all bg-[#0a0a0a]/60 border border-white/10 flex-shrink-0 pointer-events-auto"> <ChevronLeft className="w-5 h-5" /> </button>
              
              <div className="px-3 py-3 md:py-4 rounded-xl text-white font-mono text-sm border-white/10 border flex-1 text-center font-bold bg-[#0a0a0a]/60 flex items-center justify-center">
                <span className="text-[#e8b34b]">{currentMoveIndex + 1}</span><span className="text-gray-500 mx-1">/</span>{history.length}
              </div>
              
-             <button onClick={goToNext} title="Next" className="p-3 md:p-4 rounded-xl text-gray-400 hover:text-[#e8b34b] transition-all bg-[#0a0a0a]/60 border border-white/10 flex-shrink-0"> <ChevronRight className="w-5 h-5" /> </button>
-             <button onClick={goToEnd} title="End" className="p-3 md:p-4 rounded-xl text-gray-400 hover:text-[#e8b34b] transition-all bg-[#0a0a0a]/60 border border-white/10 flex-shrink-0"> <ChevronsRight className="w-5 h-5" /> </button>
-        </div>
-      </div>
-
-      {/* ============================================== */}
-      {/* MOBILE LAYOUT                                  */}
-      {/* ============================================== */}
-      <div className="flex lg:hidden flex-col flex-1 w-full relative z-10 pt-4 md:pt-12 min-h-0 pb-2">
-        
-        {/* Top Header */}
-        <div className="flex items-center justify-between mb-2 shrink-0">
-            <h1 className="text-xl font-bold font-['Montserrat'] text-gold-gradient flex items-center gap-2">
-              <BarChart3 className="w-5 h-5 text-[#e8b34b]" /> Game Review
-            </h1>
-            <div className="flex items-center gap-2">
-              {(isEngineThinking || isAnalyzing) && (
-                <div className="w-4 h-4 rounded-full border-2 border-[#e8b34b]/30 border-t-[#e8b34b] animate-spin" title="Engine analyzing..." />
-              )}
-              <button onClick={flipBoard} className="p-1.5 rounded-lg text-gray-400 hover:text-[#e8b34b] hover:bg-white/5 transition-colors" title="Flip Board">
-                <RotateCw className="w-4 h-4" />
-              </button>
-            </div>
-        </div>
-        
-        {/* Analyzing Progress */}
-        {isAnalyzing && (
-          <div className="w-full mb-2 shrink-0">
-            <div className="flex items-center justify-between text-[10px] text-gray-400 mb-1">
-              <span>Analyzing game...</span>
-              <span>{analysisProgress}%</span>
-            </div>
-            <div className="h-1 bg-gray-800 rounded-full overflow-hidden">
-              <div
-                className="h-full bg-gradient-to-r from-[#e8b34b] to-[#f0c960] transition-all duration-300"
-                style={{ width: `${analysisProgress}%` }}
-              />
-            </div>
-          </div>
-        )}
-
-        {/* Stats Panel (Accuracy Circles + Dropdown Overlay) */}
-        <div className="mb-2 shrink-0 relative z-[60]">
-          <AnalysisSummary analysis={analysis} playerColor={playerColor || 'white'} />
-        </div>
-
-        {/* Horizontal Evaluation Bar */}
-        <div className="mb-2 shrink-0 relative z-10">
-          <div className="flex justify-end items-center text-[10px] font-bold mb-1">
-            <span className={reviewMate !== null ? (reviewEval > 0 ? 'text-[#e8b34b]' : 'text-gray-400') : reviewEval > 0 ? 'text-[#e8b34b]' : reviewEval < 0 ? 'text-gray-400' : 'text-gray-500'}>
-              {reviewMate !== null ? (reviewMate === 0 ? 'Checkmate' : `M${reviewMate}`) : (reviewEval > 0 ? `+${(reviewEval/100).toFixed(1)}` : (reviewEval/100).toFixed(1))}
-            </span>
-          </div>
-          <div className="h-1.5 w-full bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 rounded-full overflow-hidden relative border border-[#e8b34b]/10">
-            <div 
-              className={`absolute top-0 bottom-0 transition-all duration-1000 ease-out rounded-full ${(reviewMate !== null && reviewEval > 0) || (reviewMate === null && reviewEval > 0) ? 'bg-gradient-to-r from-[#e8b34b] to-[#d4a03d]' : 'bg-gradient-to-l from-gray-500 to-gray-600'}`}
-              style={{ 
-                width: reviewMate !== null ? '50%' : `${Math.min(50, Math.abs(reviewEval) / 20)}%`,
-                left: reviewEval > 0 ? '50%' : undefined,
-                right: reviewEval < 0 ? '50%' : undefined,
-                boxShadow: reviewEval > 0 ? '0 0 10px rgba(232, 179, 75, 0.4)' : 'none'
-              }} 
-            />
-            <div className="absolute top-0 bottom-0 left-1/2 w-px bg-[#e8b34b]/20" />
-          </div>
-        </div>
-        
-        {/* Board */}
-        <div className="flex-1 min-h-[300px] w-full flex items-center justify-center relative z-10">
-          <div className="w-full aspect-square relative mx-auto max-w-[95vh]">
-            <Board />
-          </div>
-        </div>
-
-        {/* Sliding Horizontal Move List */}
-        <div className="w-full h-12 my-2 shrink-0 overflow-x-auto whitespace-nowrap custom-scrollbar flex items-center bg-[#0a0a0a]/60 rounded-xl px-2 border border-white/10 relative z-10 shadow-inner">
-           {history.length === 0 && <span className="text-gray-500 text-[11px] italic mx-auto">No moves yet...</span>}
-           {history.map((moveSAN, index) => {
-             const moveData = analysis[index];
-             const isActive = index === currentMoveIndex;
-             
-             let symbol = '';
-             let symbolColor = '';
-             if (moveData?.classification === 'great') { symbol = '!'; symbolColor = 'text-[#5c8bb0]'; }
-             else if (moveData?.classification === 'best') { symbol = '✓'; symbolColor = 'text-[#96bc4b]'; }
-             else if (moveData?.classification === 'inaccuracy') { symbol = '?!'; symbolColor = 'text-[#f7c631]'; }
-             else if (moveData?.classification === 'mistake') { symbol = '?'; symbolColor = 'text-[#e58f2a]'; }
-             else if (moveData?.classification === 'blunder') { symbol = '??'; symbolColor = 'text-[#ca3431]'; }
-             
-             // Auto-scroll logic: add id to active element
-             return (
-                <button 
-                  key={index} 
-                  id={isActive ? 'active-mobile-move' : ''}
-                  onClick={() => setCurrentMoveIndex(index)}
-                  className={`flex-shrink-0 px-2.5 py-1.5 mx-1 rounded-lg text-sm font-mono font-bold transition-colors flex items-center gap-1 border border-transparent ${
-                    isActive ? 'bg-[#e8b34b] text-black shadow-[0_0_15px_rgba(232,179,75,0.4)] border-[#fcd34d]' : 'bg-white/5 text-gray-300 hover:bg-white/10'
-                  }`}
-                >
-                  <span className={isActive ? 'text-black/60 text-xs' : 'text-gray-500 text-xs'}>
-                    {index % 2 === 0 ? `${(index/2)+1}.` : ''}
-                  </span>
-                  <span>{moveSAN}</span>
-                  {symbol && <span className={`text-[10px] ${isActive && symbolColor !== 'text-[#ca3431]' && symbolColor !== 'text-[#5c8bb0]' ? 'text-black font-extrabold' : symbolColor}`}>{symbol}</span>}
-                </button>
-             )
-           })}
-        </div>
-
-        {/* Navigation Arrows */}
-        <div className="flex items-center justify-between gap-2 w-full shrink-0 relative z-10 mb-2">
-             <button onClick={goToStart} title="Start" className="p-3 md:p-4 rounded-xl text-gray-400 hover:text-[#e8b34b] transition-all bg-[#0a0a0a]/60 border border-white/10 flex-shrink-0"> <ChevronsLeft className="w-5 h-5" /> </button>
-             <button onClick={goToPrev} title="Previous" className="p-3 md:p-4 rounded-xl text-gray-400 hover:text-[#e8b34b] transition-all bg-[#0a0a0a]/60 border border-white/10 flex-shrink-0"> <ChevronLeft className="w-5 h-5" /> </button>
-             
-             <div className="px-3 py-3 md:py-4 rounded-xl text-white font-mono text-sm border-white/10 border flex-1 text-center font-bold bg-[#0a0a0a]/60 flex items-center justify-center">
-               <span className="text-[#e8b34b]">{currentMoveIndex + 1}</span><span className="text-gray-500 mx-1">/</span>{history.length}
-             </div>
-             
-             <button onClick={goToNext} title="Next" className="p-3 md:p-4 rounded-xl text-gray-400 hover:text-[#e8b34b] transition-all bg-[#0a0a0a]/60 border border-white/10 flex-shrink-0"> <ChevronRight className="w-5 h-5" /> </button>
-             <button onClick={goToEnd} title="End" className="p-3 md:p-4 rounded-xl text-gray-400 hover:text-[#e8b34b] transition-all bg-[#0a0a0a]/60 border border-white/10 flex-shrink-0"> <ChevronsRight className="w-5 h-5" /> </button>
+             <button onClick={goToNext} title="Next" className="p-3 md:p-4 rounded-xl text-gray-400 hover:text-[#e8b34b] transition-all bg-[#0a0a0a]/60 border border-white/10 flex-shrink-0 pointer-events-auto"> <ChevronRight className="w-5 h-5" /> </button>
+             <button onClick={goToEnd} title="End" className="p-3 md:p-4 rounded-xl text-gray-400 hover:text-[#e8b34b] transition-all bg-[#0a0a0a]/60 border border-white/10 flex-shrink-0 pointer-events-auto"> <ChevronsRight className="w-5 h-5" /> </button>
         </div>
       </div>
     </div>

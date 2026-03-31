@@ -6,6 +6,7 @@ import type { MoveAnalysis, MoveClassification } from '../../../core/utils/analy
 interface AnalysisSummaryProps {
   analysis: MoveAnalysis[];
   playerColor: 'white' | 'black';
+  playerName?: string;
 }
 
 /**
@@ -76,8 +77,8 @@ const AccuracyGauge: React.FC<{
   const strokeDashoffset = circumference - (accuracy / 100) * circumference;
   
   return (
-    <div className="flex flex-col items-center">
-      <div className="relative w-14 h-14 lg:w-24 lg:h-24">
+    <div className="flex items-center gap-2 lg:flex-col lg:items-center">
+      <div className="relative w-10 h-10 lg:w-24 lg:h-24 shrink-0">
         {/* Background circle */}
         <svg className="w-full h-full transform -rotate-90" viewBox="0 0 96 96">
           <circle
@@ -85,16 +86,16 @@ const AccuracyGauge: React.FC<{
             cy="48"
             r="40"
             stroke="currentColor"
-            strokeWidth="8"
+            strokeWidth="10"
             fill="none"
-            className="text-gray-700"
+            className="text-white/10"
           />
           <motion.circle
             cx="48"
             cy="48"
             r="40"
             stroke={color}
-            strokeWidth="8"
+            strokeWidth="10"
             fill="none"
             strokeLinecap="round"
             strokeDasharray={circumference}
@@ -106,11 +107,12 @@ const AccuracyGauge: React.FC<{
         
         {/* Accuracy text */}
         <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <span className="text-sm lg:text-2xl font-bold text-white leading-tight">{accuracy}</span>
-          <span className="text-[9px] lg:text-xs text-gray-400 leading-tight">%</span>
+          <span className="text-xs lg:text-2xl font-bold text-white leading-none">{accuracy}</span>
         </div>
       </div>
-      <span className="mt-1 lg:mt-2 text-[10px] lg:text-sm font-medium text-gray-300">{label}</span>
+      <div className="flex flex-col justify-center lg:items-center lg:mt-2">
+        <span className="text-[11px] lg:text-sm font-semibold text-gray-300 truncate max-w-[70px] lg:max-w-none">{label}</span>
+      </div>
     </div>
   );
 };
@@ -126,10 +128,10 @@ const BreakdownItem: React.FC<{
 }> = ({ label, count, color, symbol }) => (
   <div className="flex items-center justify-between py-1">
     <div className="flex items-center gap-2">
-      <span className={`${color} font-bold text-sm`}>{symbol}</span>
-      <span className="text-sm text-gray-300">{label}</span>
+      <span className={`${color} font-bold text-[10px] w-3 text-center`}>{symbol}</span>
+      <span className="text-xs text-gray-300">{label}</span>
     </div>
-    <span className="text-sm font-medium text-white">{count}</span>
+    <span className="text-xs font-semibold text-white">{count}</span>
   </div>
 );
 
@@ -140,6 +142,7 @@ const BreakdownItem: React.FC<{
 export const AnalysisSummary: React.FC<AnalysisSummaryProps> = ({
   analysis,
   playerColor,
+  playerName = 'You'
 }) => {
   const isWhite = playerColor === 'white';
   const playerAccuracy = calculateAccuracy(analysis, isWhite);
@@ -156,14 +159,15 @@ export const AnalysisSummary: React.FC<AnalysisSummaryProps> = ({
   };
 
   return (
-    <div className="bg-black/40 rounded-xl p-3 lg:p-4 backdrop-blur-sm border border-white/10 relative z-50">
+    <div className="bg-black/40 rounded-xl p-2 lg:p-4 backdrop-blur-md border border-white/10 relative z-50">
       {/* Accuracy Section */}
-      <div className="flex justify-around mb-1 lg:mb-6">
+      <div className="flex justify-between px-2 lg:justify-around mb-1 lg:mb-6">
         <AccuracyGauge 
           accuracy={playerAccuracy} 
-          label="You" 
+          label={playerName} 
           color={getAccuracyColor(playerAccuracy)}
         />
+        <div className="w-px bg-white/10 mx-2 lg:hidden" />
         <AccuracyGauge 
           accuracy={opponentAccuracy} 
           label="Opponent" 
@@ -175,26 +179,26 @@ export const AnalysisSummary: React.FC<AnalysisSummaryProps> = ({
       <div className="lg:hidden flex justify-center -mb-2 mt-1">
         <button 
           onClick={() => setIsExpanded(!isExpanded)} 
-          className="p-1 text-gray-400 hover:text-[#e8b34b] transition-colors"
+          className="p-1 px-4 text-gray-400 hover:text-[#e8b34b] transition-colors rounded-full hover:bg-white/5"
         >
-          {isExpanded ? <ChevronUp className="w-5 h-5"/> : <ChevronDown className="w-5 h-5"/>}
+          {isExpanded ? <ChevronUp className="w-4 h-4"/> : <ChevronDown className="w-4 h-4"/>}
         </button>
       </div>
       
       {/* Breakdown Area */}
       <div className={`
         lg:block /* Always visible on desktop */
-        ${isExpanded ? 'block absolute top-full left-0 w-full mt-2 bg-[#0a0a0a]/95 backdrop-blur-md rounded-xl border border-white/10 p-4 shadow-2xl z-50' : 'hidden'}
+        ${isExpanded ? 'block absolute top-full left-0 w-full mt-2 bg-[#0a0a0a]/95 backdrop-blur-xl rounded-xl border border-white/10 p-3 shadow-2xl z-50' : 'hidden'}
       `}>
         {/* Divider */}
         <div className="h-px bg-gradient-to-r from-transparent via-white/20 to-transparent mb-4 hidden lg:block" />
         
         {/* Move Breakdown */}
-        <h3 className="text-[10px] lg:text-sm font-semibold text-gray-400 mb-2 uppercase tracking-wider">
-          Your Moves
+        <h3 className="text-[9px] lg:text-xs font-bold text-gray-500 mb-1 lg:mb-2 uppercase tracking-widest pl-1">
+          {playerName}'s Moves
         </h3>
         
-        <div className="space-y-0.5">
+        <div className="space-y-0 p-1">
           {counts.great > 0 && (
             <BreakdownItem label="Great" count={counts.great} color="text-[#5c8bb0]" symbol="!" />
           )}
