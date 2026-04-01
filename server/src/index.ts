@@ -28,13 +28,14 @@ const allowedOrigins = [
 if (process.env.FRONTEND_URL) {
   try {
     const url = new URL(process.env.FRONTEND_URL);
-    if (!url.protocol || (!url.protocol.startsWith('http://') && !url.protocol.startsWith('https://'))) {
+    if (url.protocol !== 'http:' && url.protocol !== 'https:') {
       throw new Error('Invalid protocol');
     }
     const cleanUrl = process.env.FRONTEND_URL.endsWith('/')
       ? process.env.FRONTEND_URL.slice(0, -1)
       : process.env.FRONTEND_URL;
     allowedOrigins.push(cleanUrl);
+    console.log('✓ FRONTEND_URL allowed:', cleanUrl);
   } catch (error) {
     console.error('❌ FRONTEND_URL is invalid:', process.env.FRONTEND_URL);
     console.error('Expected format: http://example.com or https://example.com');
