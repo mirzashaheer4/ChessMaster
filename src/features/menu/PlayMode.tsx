@@ -211,7 +211,13 @@ export default function PlayMode() {
 
   const handleStartDev = (settings: any) => {
     useGameStore.getState().setMode('ai');
-    useGameStore.getState().setDifficulty('hard');
+    useGameStore.getState().setDifficulty('extreme'); // The Dev is merciless
+    useGameStore.getState().setCustomBot({ 
+      name: 'The Dev', 
+      avatar: 'https://api.dicebear.com/7.x/bottts/svg?seed=TheDev&backgroundColor=0a0a0a', 
+      elo: 3200, 
+      playStyle: 'aggressive' 
+    });
     useGameStore.getState().setPlayerColor(settings.color);
     useGameStore.getState().setTimeControl(settings.timeControl);
     useGameStore.getState().setChessType(settings.chessType);
@@ -371,14 +377,22 @@ export default function PlayMode() {
             <ArrowLeft className="w-5 h-5 transition-transform group-hover:-translate-x-1" />
             <span className="text-sm font-medium">Back</span>
           </button>
-          
-          <button
-            onClick={() => navigate('/history')}
-            className="flex items-center gap-2 text-[#e8b34b] hover:text-[#ffd700] transition-colors duration-300 cursor-pointer"
-          >
-            <History className="w-5 h-5" />
-            <span className="text-sm font-medium">History</span>
-          </button>
+          <div className="flex flex-row gap-4 sm:gap-6">
+            <button
+              onClick={() => navigate('/history')}
+              className="flex items-center gap-2 text-[#e8b34b] hover:text-[#ffd700] transition-colors duration-300 cursor-pointer"
+            >
+              <History className="w-5 h-5" />
+              <span className="text-sm font-medium hidden sm:inline">History</span>
+            </button>
+            <button
+              onClick={() => navigate('/profile')}
+              className="flex items-center gap-2 text-[#60a5fa] hover:text-[#93c5fd] transition-colors duration-300 cursor-pointer"
+            >
+              <User className="w-5 h-5" />
+              <span className="text-sm font-medium hidden sm:inline">Profile</span>
+            </button>
+          </div>
         </div>
 
         {/* Header */}

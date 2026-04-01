@@ -1,5 +1,5 @@
-export type BoardTheme = 'glass' | 'wood' | 'green' | 'blue' | 'classic' | 'midnight' | 'purple' | 'cherry';
-export type PieceTheme = 'neo' | 'classic' | 'alpha' | 'game_room' | 'wood' | 'glass' | 'condal' | 'maya' | 'gothic';
+export type BoardTheme = 'glass' | 'wood' | 'green' | 'blue' | 'classic' | 'midnight' | 'purple' | 'cherry' | 'cyberpunk' | 'marble' | 'glass_minimal';
+export type PieceTheme = 'neo' | 'classic' | 'alpha' | 'game_room' | 'wood' | 'glass' | 'condal' | 'maya' | 'gothic' | 'neon' | 'marble_pieces';
 
 export const BOARD_THEMES: Record<BoardTheme, {
   name: string;
@@ -112,6 +112,45 @@ export const BOARD_THEMES: Record<BoardTheme, {
       shift: 'rgba(0, 0, 0, 0.8)',         // Black
     }
   },
+  cyberpunk: {
+    name: 'Cyberpunk (Premium)',
+    light: '#2d0046',
+    dark: '#0f0019',
+    border: '#00ffcc',
+    background: 'linear-gradient(135deg, #090014 0%, #17002b 100%)',
+    arrowColors: {
+      default: 'rgba(0, 255, 204, 0.9)',  // Neon Cyan
+      alt: 'rgba(255, 0, 128, 0.9)',      // Neon Pink
+      ctrl: 'rgba(255, 255, 0, 0.9)',     // Neon Yellow
+      shift: 'rgba(128, 0, 255, 0.9)',    // Neon Purple
+    }
+  },
+  marble: {
+    name: 'Marble & Gold (Premium)',
+    light: '#f8f9fa',
+    dark: '#212529',
+    border: '#d4af37', // Gold 
+    background: 'linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%)',
+    arrowColors: {
+      default: 'rgba(212, 175, 55, 0.9)', // Gold
+      alt: 'rgba(0, 0, 0, 0.8)',          // Black
+      ctrl: 'rgba(100, 100, 100, 0.8)',   // Silver
+      shift: 'rgba(220, 20, 60, 0.8)',    // Crimson
+    }
+  },
+  glass_minimal: {
+    name: 'Minimal Glass (Premium)',
+    light: 'rgba(255, 255, 255, 0.05)',
+    dark: 'rgba(0, 0, 0, 0.15)',
+    border: 'rgba(255, 255, 255, 0.2)',
+    background: 'linear-gradient(135deg, #0f172a 0%, #020617 100%)',
+    arrowColors: {
+      default: 'rgba(255, 255, 255, 0.7)',
+      alt: 'rgba(148, 163, 184, 0.7)',
+      ctrl: 'rgba(96, 165, 250, 0.7)',
+      shift: 'rgba(248, 113, 113, 0.7)',
+    }
+  }
 };
 
 export const PIECE_THEMES: Record<PieceTheme, {
@@ -154,4 +193,12 @@ export const PIECE_THEMES: Record<PieceTheme, {
     name: 'Glass',
     getIcon: (c, t) => `https://images.chesscomfiles.com/chess-themes/pieces/glass/150/${c}${t}.png`,
   },
+  neon: {
+    name: 'Neon',
+    getIcon: (c, t) => `https://images.chesscomfiles.com/chess-themes/pieces/neon/150/${c}${t}.png`,
+  },
+  marble_pieces: {
+    name: 'Marble',
+    getIcon: (c, t) => `https://images.chesscomfiles.com/chess-themes/pieces/marble/150/${c}${t}.png`,
+  }
 };

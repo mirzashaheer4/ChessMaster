@@ -56,6 +56,31 @@ const AIGame = () => {
   const [timeoutHandled, setTimeoutHandled] = useState(false);
   const [showThemeSelection, setShowThemeSelection] = useState(false);
   const [showMobileOptions, setShowMobileOptions] = useState(false);
+  const [chatMessage, setChatMessage] = useState("");
+
+  // Dev mode chat logic
+  useEffect(() => {
+    if (customBot?.name === 'The Dev' && history.length > 0 && reviewIndex === -1 && gameStatus === 'active') {
+      const isPlayerTurn = (history.length % 2 === 0 && playerColor === 'white') || (history.length % 2 === 1 && playerColor === 'black');
+      
+      if (!isPlayerTurn) { 
+        setChatMessage("...");
+      } else {
+        const devMessages = [
+          "You're going to need more than that...",
+          "Interesting move...",
+          "I coded myself to recognize that blunder.",
+          "Are you sure about that?",
+          "Calculating 20 moves ahead...",
+          "Nice try."
+        ];
+        const randomMsg = devMessages[Math.floor(Math.random() * devMessages.length)];
+        setChatMessage(randomMsg);
+        const timer = setTimeout(() => setChatMessage(""), 3000);
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [history.length, customBot, reviewIndex, gameStatus, playerColor]);
 
   // Close resign confirm on Escape
   useEffect(() => {
@@ -366,17 +391,22 @@ const AIGame = () => {
                 boxShadow: `0 0 20px ${getDifficultyColor()}20`,
               }}
             >
-              {difficulty === 'custom' && customBot ? (
+              {customBot ? (
                  <img src={customBot.avatar} alt="Bot Avatar" className="w-full h-full object-cover" />
               ) : (
                  <Bot className="w-6 h-6" style={{ color: getDifficultyColor() }} />
               )}
             </div>
-            <div>
+            <div className="relative">
               <p className="font-bold text-white text-sm font-['Montserrat']">{opponentName}</p>
               <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: getDifficultyColor() }}>
                 {opponentLabel}
               </p>
+              {chatMessage && (
+                <div className="absolute left-full top-0 ml-2 whitespace-nowrap bg-black/80 text-[#00ffcc] border border-[#00ffcc]/50 px-3 py-1.5 rounded-br-xl rounded-tr-xl rounded-tl-xl text-[10px] font-mono shadow-[0_0_10px_rgba(0,255,204,0.3)] animate-pulse z-50">
+                  {chatMessage}
+                </div>
+              )}
             </div>
           </div>
           <CapturedPieces color={playerColor === 'white' ? 'white' : 'black'} className="mt-3" />
@@ -530,14 +560,19 @@ const AIGame = () => {
         <div className="flex lg:hidden w-full px-4 items-center justify-between py-2 z-20">
            <div className="flex items-center gap-3">
              <div className="w-10 h-10 rounded-md overflow-hidden bg-white/10 flex items-center justify-center border border-white/10 shadow-sm">
-               {difficulty === 'custom' && customBot ? <img src={customBot.avatar} alt="Bot" className="w-full h-full object-cover" /> : <Bot className="w-6 h-6 text-[#e8b34b]" />}
+               {customBot ? <img src={customBot.avatar} alt="Bot" className="w-full h-full object-cover" /> : <Bot className="w-6 h-6" style={{ color: getDifficultyColor() }} />}
              </div>
-             <div className="flex flex-col">
+             <div className="flex flex-col relative">
                <div className="flex items-center gap-2">
                  <span className="text-sm font-bold text-white leading-tight">{opponentName}</span>
                  {displayEval < 0 && <span className="text-[10px] font-bold text-gray-900 bg-white/80 px-1 rounded-sm leading-tight tracking-wider">{(Math.abs(displayEval)/100).toFixed(1)}</span>}
                </div>
-               <span className="text-[11px] text-[#e8b34b] font-medium leading-tight">{opponentLabel}</span>
+               <span className="text-[11px] font-medium leading-tight" style={{ color: getDifficultyColor() }}>{opponentLabel}</span>
+               {chatMessage && (
+                 <div className="absolute top-full left-0 mt-1 whitespace-nowrap bg-black/80 text-[#00ffcc] border border-[#00ffcc]/50 px-2 py-1 rounded-br-lg rounded-tr-lg rounded-bl-lg text-[9px] font-mono shadow-[0_0_8px_rgba(0,255,204,0.3)] animate-pulse z-50">
+                   {chatMessage}
+                 </div>
+               )}
              </div>
            </div>
            <div className="flex justify-center min-w-[70px]">

@@ -5,8 +5,11 @@ import * as THREE from 'three';
 const ParticleSystem = ({ color = ['#e8b34b', '#d4af37', '#fcd34d'], intensity = 1, size = 1 }: { color: string | string[], intensity: number, size: number }) => {
   const meshRef = useRef<THREE.InstancedMesh>(null);
   
-  // Create count based on intensity (Doubled default count for more bubbles)
-  const count = Math.floor(80 * intensity);
+  // Memoize isMobile check specifically for rendering constraints
+  const isMobile = useMemo(() => typeof window !== 'undefined' ? window.innerWidth < 768 : false, []);
+  
+  // Cut count drastically for mobile
+  const count = Math.floor((isMobile ? 20 : 80) * intensity);
   
   // Normalize color to array
   const colorsArray = useMemo(() => Array.isArray(color) ? color : [color], [color]);
@@ -77,11 +80,11 @@ const ParticleSystem = ({ color = ['#e8b34b', '#d4af37', '#fcd34d'], intensity =
 
   return (
     <instancedMesh ref={meshRef} args={[undefined, undefined, count]}>
-      <circleGeometry args={[1, 32]} />
+      <circleGeometry args={[1, isMobile ? 12 : 32]} />
       <meshBasicMaterial 
         color="#ffffff"
         transparent 
-        opacity={0.3} 
+        opacity={isMobile ? 0.2 : 0.3} 
         depthWrite={false}
         blending={THREE.AdditiveBlending}
       />
@@ -105,11 +108,16 @@ export default function WebGLParticleBackground({
   intensity?: number;
   size?: number;
 }) {
+  const isMobile = typeof window !== 'undefined' ? window.innerWidth < 768 : false;
+  
+  // Do not render anything on super low-end or if explicitly wanting absolutely zero lag.
+  // We'll keep a very lightweight version running instead of completely off, for aesthetics.
+  
   return (
     <div className="absolute inset-0 pointer-events-none z-0">
       <Canvas 
-        gl={{ alpha: true, antialias: false }} 
-        dpr={[1, 1.5]} // Optimize for mobile (max 1.5 pixel ratio)
+        gl={{ alpha: true, antialias: false, powerPreference: 'high-performance' }} 
+        dpr={isMobile ? [0.5, 1] : [1, 1.5]} // Optimize for mobile (cut pixel ratio down)
         camera={{ position: [0, 0, 10], fov: 50 }}
       >
         <CameraSetup />

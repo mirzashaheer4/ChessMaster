@@ -3,6 +3,7 @@ import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Landing from './features/landing/Landing';
 import Dashboard from './features/landing/Dashboard';
 import PlayMode from './features/menu/PlayMode';
+import Profile from './features/menu/Profile';
 import DifficultyScreen from './features/menu/Difficulty';
 import About from './features/landing/About';
 import HistoryScreen from './features/menu/History';
@@ -32,6 +33,7 @@ function AppContent() {
           <Route path="/" element={user ? <Navigate to="/dashboard" replace /> : <Landing />} />
           <Route path="/dashboard" element={user ? <Dashboard /> : <Navigate to="/" replace />} />
           <Route path="/play" element={user ? <PlayMode /> : <Navigate to="/" replace />} />
+          <Route path="/profile" element={user ? <Profile /> : <Navigate to="/" replace />} />
           <Route path="/difficulty" element={user ? <DifficultyScreen /> : <Navigate to="/" replace />} />
           <Route path="/game/local" element={user ? <LocalGame /> : <Navigate to="/" replace />} />
           <Route path="/game/ai" element={user ? <AIGame /> : <Navigate to="/" replace />} />

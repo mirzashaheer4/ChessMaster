@@ -12,6 +12,10 @@ import {
   Dices,
   Menu,
   X,
+  User,
+  Activity,
+  Users,
+  Timer,
 } from 'lucide-react';
 
 import { useAuthStore } from '../../core/store/auth';
@@ -96,15 +100,24 @@ const Navbar = () => {
           
           <div className="flex items-center gap-4 ml-4 pl-4 border-l border-white/10">
             {user ? (
-              <button 
-                onClick={() => {
-                  logout();
-                  navigate('/');
-                }}
-                className="px-4 py-2 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-sm font-medium transition-colors cursor-pointer"
-              >
-                Log out
-              </button>
+              <div className="flex items-center gap-3">
+                <button 
+                  onClick={() => navigate('/profile')}
+                  className="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/20 text-blue-400 text-sm font-medium transition-colors cursor-pointer group"
+                >
+                  <User className="w-4 h-4 transition-transform group-hover:scale-110" />
+                  Profile
+                </button>
+                <button 
+                  onClick={() => {
+                    logout();
+                    navigate('/');
+                  }}
+                  className="px-4 py-2 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-sm font-medium transition-colors cursor-pointer"
+                >
+                  Log out
+                </button>
+              </div>
             ) : (
               <button 
                 onClick={() => window.dispatchEvent(new Event('open-login'))}
@@ -147,16 +160,28 @@ const Navbar = () => {
           ))}
           <div className="pt-6 mt-2 border-t border-white/10">
             {user ? (
-              <button 
-                onClick={() => {
-                  setMobileMenuOpen(false);
-                  logout();
-                  navigate('/');
-                }}
-                className="w-full py-4 rounded-xl bg-white/5 border border-white/10 text-white text-lg font-bold transition-colors hover:bg-white/10"
-              >
-                Log out
-              </button>
+              <div className="flex flex-col gap-3">
+                <button 
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    navigate('/profile');
+                  }}
+                  className="w-full py-4 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-400 text-lg font-bold flex items-center justify-center gap-3"
+                >
+                  <User className="w-6 h-6" />
+                  My Profile
+                </button>
+                <button 
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    logout();
+                    navigate('/');
+                  }}
+                  className="w-full py-4 rounded-xl bg-white/5 border border-white/10 text-white text-lg font-bold"
+                >
+                  Log out
+                </button>
+              </div>
             ) : (
               <button 
                 onClick={() => {
@@ -535,6 +560,74 @@ const Footer = () => (
   </footer>
 );
 
+// ─── Live Analytics Section ──────────────────────────────────────
+const LiveAnalyticsSection = () => {
+  const [counts, setCounts] = useState({ games: 0, players: 0, accuracy: 0 });
+  const sectionRef = useRef<HTMLElement>(null);
+  const [hasAnimated, setHasAnimated] = useState(false);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && !hasAnimated) {
+          setHasAnimated(true);
+          const duration = 2000;
+          const frameDuration = 1000 / 60;
+          const totalFrames = Math.round(duration / frameDuration);
+          
+          let frame = 0;
+          const timer = setInterval(() => {
+            frame++;
+            const progress = frame / totalFrames;
+            const easeOutQuad = (t: number) => t * (2 - t);
+            const currentProgress = easeOutQuad(progress);
+
+            setCounts({
+              games: Math.floor(currentProgress * 42350),
+              players: Math.floor(currentProgress * 12890),
+              accuracy: Math.floor(currentProgress * 88)
+            });
+
+            if (frame === totalFrames) clearInterval(timer);
+          }, frameDuration);
+        }
+      },
+      { threshold: 0.1 }
+    );
+    if (sectionRef.current) observer.observe(sectionRef.current);
+    return () => observer.disconnect();
+  }, [hasAnimated]);
+
+  const stats = [
+    { icon: Users, label: 'Active Today', value: counts.players.toLocaleString(), color: 'blue' },
+    { icon: Activity, label: 'Games Played', value: counts.games.toLocaleString(), color: 'amber' },
+    { icon: Timer, label: 'Avg. Match Accuracy', value: `${counts.accuracy}%`, color: 'emerald' },
+  ];
+
+  return (
+    <section ref={sectionRef} className="py-24 relative overflow-hidden">
+      <div className="absolute inset-0 bg-blue-500/5 blur-[120px] rounded-full -translate-x-1/2" />
+      <div className="max-w-7xl mx-auto px-6 relative z-10">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {stats.map((stat, i) => (
+            <div key={i} className="glass-card rounded-3xl p-8 text-center flex flex-col items-center group hover:border-[#e8b34b]/30 transition-all">
+              <div className={`w-16 h-16 rounded-2xl mb-6 flex items-center justify-center bg-${stat.color}-500/20 text-${stat.color}-400 group-hover:scale-110 transition-transform`}>
+                <stat.icon className="w-8 h-8" />
+              </div>
+              <div className="text-4xl font-black font-['Montserrat'] mb-2 text-white">
+                {stat.value}
+              </div>
+              <div className="text-gray-400 font-medium uppercase tracking-[0.2em] text-[10px]">
+                {stat.label}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+};
+
 // ─── Main Landing Component ───────────────────────────────────────
 const Dashboard = () => {
   return (
@@ -542,6 +635,7 @@ const Dashboard = () => {
       <Navbar />
       <HeroSection />
       <FeaturesSection />
+      <LiveAnalyticsSection />
       <LeaderboardSection />
       <CTASection />
       <Footer />
