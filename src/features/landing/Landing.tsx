@@ -17,6 +17,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { HeroBoard } from './HeroBoard';
 import WebGLParticleBackground from '../../core/components/WebGLParticleBackground';
+import { fetchLeaderboard, type Leader } from '../../core/api/statsApi';
 
 // ─── Floating Chess Piece ─────────────────────────────────────────
 const FloatingPiece = ({ 
@@ -199,19 +200,6 @@ const HeroSection = () => (
             Get Started
           </button>
         </div>
-
-        {/* Stats */}
-        <div className="flex items-center justify-center lg:justify-start gap-8 md:gap-12 mt-12 animate-fade-in-up stagger-4 bg-black/20 backdrop-blur-sm border border-white/5 py-4 px-8 rounded-2xl w-fit mx-auto lg:mx-0">
-          <div className="text-center lg:text-left">
-            <div className="text-2xl font-bold text-white">1,500,000+</div>
-            <div className="text-sm text-[#e8b34b] font-medium uppercase tracking-wider">Playing Now</div>
-          </div>
-          <div className="w-px h-10 bg-white/10" />
-          <div className="text-center lg:text-left">
-            <div className="text-2xl font-bold text-white">50M+</div>
-            <div className="text-sm text-[#e8b34b] font-medium uppercase tracking-wider">Games Today</div>
-          </div>
-        </div>
       </div>
     </div>
 
@@ -282,6 +270,15 @@ const FeaturesSection = () => {
 const LeaderboardSection = () => {
   const sectionRef = useRef<HTMLElement>(null);
   const [isVisible, setIsVisible] = useState(false);
+  const [leaders, setLeaders] = useState<Leader[]>([]);
+
+  useEffect(() => {
+    fetchLeaderboard().then(data => {
+      if (data && data.leaders) {
+        setLeaders(data.leaders);
+      }
+    });
+  }, []);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -291,14 +288,6 @@ const LeaderboardSection = () => {
     if (sectionRef.current) observer.observe(sectionRef.current);
     return () => observer.disconnect();
   }, []);
-
-  const leaders = [
-    { rank: 1, name: 'Magnus Carlsen', rating: 2830, country: 'NO', wins: 1247 },
-    { rank: 2, name: 'Fabiano Caruana', rating: 2804, country: 'US', wins: 1189 },
-    { rank: 3, name: 'Hikaru Nakamura', rating: 2788, country: 'US', wins: 1156 },
-    { rank: 4, name: 'Ding Liren', rating: 2762, country: 'CN', wins: 1087 },
-    { rank: 5, name: 'Ian Nepomniachtchi', rating: 2758, country: 'RU', wins: 1054 },
-  ];
 
   return (
     <section id="leaderboard" ref={sectionRef} className="relative py-24 md:py-32">
@@ -440,11 +429,9 @@ const Footer = () => {
         <div>
           <h4 className="font-semibold mb-4 text-sm uppercase tracking-wider">Quick Links</h4>
           <ul className="space-y-3">
-            {['Play Online', 'Learn Chess', 'Puzzles', 'Tournaments'].map((item) => (
-              <li key={item}>
-                <a href="#" className="text-gray-500 hover:text-[#e8b34b] text-sm transition-colors duration-300">{item}</a>
-              </li>
-            ))}
+            <li><a href="#" onClick={(e) => { e.preventDefault(); window.dispatchEvent(new Event('open-login')); }} className="text-gray-500 hover:text-[#e8b34b] text-sm transition-colors duration-300">Play Online</a></li>
+            <li><a href="#leaderboard" className="text-gray-500 hover:text-[#e8b34b] text-sm transition-colors duration-300">Leaderboard</a></li>
+            <li><a href="#" onClick={(e) => { e.preventDefault(); window.dispatchEvent(new Event('open-login')); }} className="text-gray-500 hover:text-[#e8b34b] text-sm transition-colors duration-300">History & Analysis</a></li>
           </ul>
         </div>
 
@@ -452,11 +439,8 @@ const Footer = () => {
         <div>
           <h4 className="font-semibold mb-4 text-sm uppercase tracking-wider">Resources</h4>
           <ul className="space-y-3">
-            {['Help Center', 'Contact Us', 'Terms of Service', 'Privacy Policy'].map((item) => (
-              <li key={item}>
-                <a href="#" className="text-gray-500 hover:text-[#e8b34b] text-sm transition-colors duration-300">{item}</a>
-              </li>
-            ))}
+            <li><a href="#about" className="text-gray-500 hover:text-[#e8b34b] text-sm transition-colors duration-300">About Us</a></li>
+            <li><a href="#" className="text-gray-500 hover:text-[#e8b34b] text-sm transition-colors duration-300">Help Center</a></li>
           </ul>
         </div>
 

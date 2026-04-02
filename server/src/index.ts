@@ -54,6 +54,7 @@ const PORT = process.env.PORT || 3001;
 
 import authRoutes from './routes/authRoutes';
 import gameRoutes from './routes/gameRoutes';
+import statsRoutes from './routes/statsRoutes';
 import { registerOnlineGameHandler } from './controllers/onlineGameHandler';
 
 app.use(cors({
@@ -67,6 +68,7 @@ app.use(express.json());
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/games', gameRoutes);
+app.use('/api/stats', statsRoutes);
 
 // Basic health check route
 app.get('/health', (req, res) => {

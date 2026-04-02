@@ -13,15 +13,16 @@ import {
   Menu,
   X,
   User,
-  Activity,
-  Users,
-  Timer,
+  Trophy,
+  Swords,
+  XCircle,
 } from 'lucide-react';
 
 import { useAuthStore } from '../../core/store/auth';
 
 import { useNavigate } from 'react-router-dom';
 import WebGLParticleBackground from '../../core/components/WebGLParticleBackground';
+import { fetchLeaderboard, type Leader } from '../../core/api/statsApi';
 
 // ─── Floating Chess Piece ─────────────────────────────────────────
 const FloatingPiece = ({ 
@@ -269,19 +270,6 @@ const HeroSection = () => {
           Analyze Game
         </button>
       </div>
-
-      <div className="flex flex-wrap items-center justify-center gap-8 md:gap-16 mt-16 animate-fade-in-up stagger-4">
-        {[
-          { value: '1M+', label: 'Active Players' },
-          { value: '50M+', label: 'Games Played' },
-          { value: '4.9', label: 'User Rating' }
-        ].map((stat, idx) => (
-          <div key={idx} className="text-center">
-            <div className="text-2xl md:text-3xl font-bold text-[#e8b34b]">{stat.value}</div>
-            <div className="text-sm text-gray-500">{stat.label}</div>
-          </div>
-        ))}
-      </div>
     </div>
 
     {/* Bottom Gradient Fade */}
@@ -352,6 +340,15 @@ const FeaturesSection = () => {
 const LeaderboardSection = () => {
   const sectionRef = useRef<HTMLElement>(null);
   const [isVisible, setIsVisible] = useState(false);
+  const [leaders, setLeaders] = useState<Leader[]>([]);
+
+  useEffect(() => {
+    fetchLeaderboard().then(data => {
+      if (data && data.leaders) {
+        setLeaders(data.leaders);
+      }
+    });
+  }, []);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -361,14 +358,6 @@ const LeaderboardSection = () => {
     if (sectionRef.current) observer.observe(sectionRef.current);
     return () => observer.disconnect();
   }, []);
-
-  const leaders = [
-    { rank: 1, name: 'Magnus Carlsen', rating: 2830, country: 'NO', wins: 1247 },
-    { rank: 2, name: 'Fabiano Caruana', rating: 2804, country: 'US', wins: 1189 },
-    { rank: 3, name: 'Hikaru Nakamura', rating: 2788, country: 'US', wins: 1156 },
-    { rank: 4, name: 'Ding Liren', rating: 2762, country: 'CN', wins: 1087 },
-    { rank: 5, name: 'Ian Nepomniachtchi', rating: 2758, country: 'RU', wins: 1054 },
-  ];
 
   return (
     <section id="leaderboard" ref={sectionRef} className="relative py-24 md:py-32">
@@ -439,6 +428,7 @@ const CTASection = () => {
   const sectionRef = useRef<HTMLElement>(null);
   const [isVisible, setIsVisible] = useState(false);
   const navigate = useNavigate();
+  const { user } = useAuthStore();
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -460,17 +450,21 @@ const CTASection = () => {
       <div className="max-w-4xl mx-auto px-6 relative z-10">
         <div className={`glass-card rounded-3xl p-10 md:p-16 text-center transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
           <h2 className="text-4xl md:text-5xl font-bold font-['Montserrat'] mb-6">
-            Ready to <span className="text-gold-gradient">Start Your Journey</span>?
+            {user ? (
+              <>Ready to continue <span className="text-gold-gradient">Your Mastery</span>?</>
+            ) : (
+              <>Ready to <span className="text-gold-gradient">Start Your Journey</span>?</>
+            )}
           </h2>
           <p className="text-gray-400 text-lg mb-8 max-w-xl mx-auto">
-            Play for free, improve your skills, and become a chess master.
+            {user ? 'Jump right back in and dominate the board.' : 'Play for free, improve your skills, and become a chess master.'}
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <button 
               onClick={() => navigate('/play')}
-              className="w-full sm:w-auto btn-gold px-10 py-4 rounded-full text-xl font-bold flex items-center justify-center uppercase hover:-translate-y-1 transition-transform"
+              className="w-full sm:w-auto btn-gold px-10 py-4 rounded-full text-xl font-bold flex items-center justify-center uppercase hover:-translate-y-1 transition-transform cursor-pointer"
             >
-              Get Started Today
+              {user ? 'Play a Match' : 'Get Started Today'}
             </button>
           </div>
         </div>
@@ -510,11 +504,9 @@ const Footer = () => (
         <div>
           <h4 className="font-semibold mb-4 text-sm uppercase tracking-wider">Quick Links</h4>
           <ul className="space-y-3">
-            {['Play Online', 'Learn Chess', 'Puzzles', 'Tournaments'].map((item) => (
-              <li key={item}>
-                <a href="#" className="text-gray-500 hover:text-[#e8b34b] text-sm transition-colors duration-300">{item}</a>
-              </li>
-            ))}
+            <li><a href="/play" className="text-gray-500 hover:text-[#e8b34b] text-sm transition-colors duration-300">Play Online</a></li>
+            <li><a href="#leaderboard" className="text-gray-500 hover:text-[#e8b34b] text-sm transition-colors duration-300">Leaderboard</a></li>
+            <li><a href="/history" className="text-gray-500 hover:text-[#e8b34b] text-sm transition-colors duration-300">History & Analysis</a></li>
           </ul>
         </div>
 
@@ -522,11 +514,8 @@ const Footer = () => (
         <div>
           <h4 className="font-semibold mb-4 text-sm uppercase tracking-wider">Resources</h4>
           <ul className="space-y-3">
-            {['Help Center', 'Contact Us', 'Terms of Service', 'Privacy Policy'].map((item) => (
-              <li key={item}>
-                <a href="#" className="text-gray-500 hover:text-[#e8b34b] text-sm transition-colors duration-300">{item}</a>
-              </li>
-            ))}
+            <li><a href="/about" className="text-gray-500 hover:text-[#e8b34b] text-sm transition-colors duration-300">About Us</a></li>
+            <li><a href="#" className="text-gray-500 hover:text-[#e8b34b] text-sm transition-colors duration-300">Help Center</a></li>
           </ul>
         </div>
 
@@ -562,9 +551,30 @@ const Footer = () => (
 
 // ─── Live Analytics Section ──────────────────────────────────────
 const LiveAnalyticsSection = () => {
-  const [counts, setCounts] = useState({ games: 0, players: 0, accuracy: 0 });
+  const { userGames, fetchGames, user } = useAuthStore();
+  const navigate = useNavigate();
+  const [counts, setCounts] = useState({ games: 0, wins: 0, losses: 0 });
+  const [targetStats, setTargetStats] = useState({ games: 0, wins: 0, losses: 0 });
   const sectionRef = useRef<HTMLElement>(null);
   const [hasAnimated, setHasAnimated] = useState(false);
+
+  useEffect(() => {
+    if (user) {
+      fetchGames();
+    }
+  }, [user, fetchGames]);
+
+  useEffect(() => {
+    if (userGames) {
+      let w = 0; let l = 0;
+      userGames.forEach((game: true | any) => {
+        const res = game.result?.toLowerCase() || '';
+        if (res === 'win' || res === '1-0') w++;
+        else if (res === 'loss' || res === '0-1') l++;
+      });
+      setTargetStats({ games: userGames.length, wins: w, losses: l });
+    }
+  }, [userGames]);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -583,9 +593,9 @@ const LiveAnalyticsSection = () => {
             const currentProgress = easeOutQuad(progress);
 
             setCounts({
-              games: Math.floor(currentProgress * 42350),
-              players: Math.floor(currentProgress * 12890),
-              accuracy: Math.floor(currentProgress * 88)
+              games: Math.floor(currentProgress * targetStats.games),
+              wins: Math.floor(currentProgress * targetStats.wins),
+              losses: Math.floor(currentProgress * targetStats.losses)
             });
 
             if (frame === totalFrames) clearInterval(timer);
@@ -596,12 +606,12 @@ const LiveAnalyticsSection = () => {
     );
     if (sectionRef.current) observer.observe(sectionRef.current);
     return () => observer.disconnect();
-  }, [hasAnimated]);
+  }, [hasAnimated, targetStats]);
 
   const stats = [
-    { icon: Users, label: 'Active Today', value: counts.players.toLocaleString(), color: 'blue' },
-    { icon: Activity, label: 'Games Played', value: counts.games.toLocaleString(), color: 'amber' },
-    { icon: Timer, label: 'Avg. Match Accuracy', value: `${counts.accuracy}%`, color: 'emerald' },
+    { icon: Trophy, label: 'Games Won', value: counts.wins.toLocaleString(), color: 'emerald' },
+    { icon: Swords, label: 'Total Games', value: counts.games.toLocaleString(), color: 'amber' },
+    { icon: XCircle, label: 'Games Lost', value: counts.losses.toLocaleString(), color: 'red' },
   ];
 
   return (
@@ -610,14 +620,22 @@ const LiveAnalyticsSection = () => {
       <div className="max-w-7xl mx-auto px-6 relative z-10">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {stats.map((stat, i) => (
-            <div key={i} className="glass-card rounded-3xl p-8 text-center flex flex-col items-center group hover:border-[#e8b34b]/30 transition-all">
-              <div className={`w-16 h-16 rounded-2xl mb-6 flex items-center justify-center bg-${stat.color}-500/20 text-${stat.color}-400 group-hover:scale-110 transition-transform`}>
+            <div 
+              key={i} 
+              onClick={() => navigate('/history')}
+              className="glass-card rounded-3xl p-8 text-center flex flex-col items-center group
+                cursor-pointer transition-all duration-500 ease-out 
+                hover:-translate-y-3 hover:scale-105 hover:bg-[#11111a]/90
+                hover:shadow-[0_0_40px_rgba(232,179,75,0.15)] hover:border-[#e8b34b]/40 z-10"
+            >
+              <div className={`w-16 h-16 rounded-2xl mb-6 flex items-center justify-center bg-${stat.color}-500/20 text-${stat.color}-400 
+                transition-all duration-500 group-hover:scale-110 group-hover:rotate-6 group-hover:shadow-[0_0_20px_var(--tw-shadow-color)] shadow-${stat.color}-500/30`}>
                 <stat.icon className="w-8 h-8" />
               </div>
-              <div className="text-4xl font-black font-['Montserrat'] mb-2 text-white">
+              <div className={`text-4xl font-black font-['Montserrat'] mb-2 text-white group-hover:text-${stat.color}-400 transition-colors duration-300`}>
                 {stat.value}
               </div>
-              <div className="text-gray-400 font-medium uppercase tracking-[0.2em] text-[10px]">
+              <div className="text-gray-400 font-medium uppercase tracking-[0.2em] text-[10px] group-hover:text-gray-300 transition-colors duration-300">
                 {stat.label}
               </div>
             </div>
