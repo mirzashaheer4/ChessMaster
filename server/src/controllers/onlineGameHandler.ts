@@ -2,6 +2,8 @@ import { Server, Socket } from 'socket.io';
 import { Chess } from 'chess.js';
 import jwt from 'jsonwebtoken';
 import { JWT_SECRET_SAFE } from '../config';
+import { onlineUsers } from './friendController';
+import { prisma } from '../prisma';
 
 // ─── Types ───────────────────────────────────────────────────────────
 interface QueueEntry {
@@ -35,6 +37,7 @@ interface GameRoom {
 const matchmakingQueue: Map<string, QueueEntry> = new Map(); // socketId -> entry
 const gameRooms: Map<string, GameRoom> = new Map();           // roomId -> room
 const playerRooms: Map<string, string> = new Map();           // socketId -> roomId
+const pendingInvites: Map<string, { from: QueueEntry; to: string; timeout: NodeJS.Timeout }> = new Map(); // inviteId -> invite
 
 // ─── Helpers ─────────────────────────────────────────────────────────
 function generateRoomId(): string {
@@ -231,7 +234,10 @@ export function registerOnlineGameHandler(io: Server) {
   io.on('connection', (socket: Socket) => {
     const user = (socket as any).user as { userId: string; username: string };
 
-    // ── Check for reconnection to existing game ──
+    // ── Online Presence ──
+    onlineUsers.set(user.userId, socket.id);
+    socket.broadcast.emit('user_online', { userId: user.userId, username: user.username });
+
     for (const [roomId, room] of gameRooms) {
       if (room.status !== 'playing') continue;
 
@@ -499,10 +505,138 @@ export function registerOnlineGameHandler(io: Server) {
       }
     });
 
+    // ── Get Online Users ──
+    socket.on('get_online_users', () => {
+      const onlineList = Array.from(onlineUsers.keys());
+      socket.emit('online_users_list', { users: onlineList });
+    });
+
+    // ── Forward Friend Request Notification ──
+    socket.on('notify_friend_request', (data: { receiverId: string; request: any }) => {
+      const receiverSocketId = onlineUsers.get(data.receiverId);
+      if (receiverSocketId) {
+        io.to(receiverSocketId).emit('friend_request_received', data.request);
+      }
+    });
+
+    // ── Forward Friend Request Accepted ──
+    socket.on('notify_friend_accepted', (data: { senderId: string }) => {
+      const senderSocketId = onlineUsers.get(data.senderId);
+      if (senderSocketId) {
+        io.to(senderSocketId).emit('friend_request_accepted', { 
+          userId: user.userId, 
+          username: user.username 
+        });
+      }
+    });
+
+    // ── Invite Friend to Game ──
+    socket.on('invite_friend', async (data: { friendId: string; timeCategory: string; timeInitial: number; timeIncrement: number; elo?: number }) => {
+      // Check if friend is online
+      const friendSocketId = onlineUsers.get(data.friendId);
+      if (!friendSocketId) {
+        socket.emit('invite_error', { message: 'Friend is not online' });
+        return;
+      }
+
+      // Verify friendship exists
+      const friendship = await (prisma as any).friendship.findFirst({
+        where: {
+          OR: [
+            { userAId: user.userId, userBId: data.friendId },
+            { userAId: data.friendId, userBId: user.userId },
+          ],
+        },
+      });
+
+      if (!friendship) {
+        socket.emit('invite_error', { message: 'You are not friends with this user' });
+        return;
+      }
+
+      const inviteId = 'inv_' + Math.random().toString(36).substring(2, 10) + Date.now().toString(36);
+      
+      // Auto-decline after 30 seconds
+      const timeout = setTimeout(() => {
+        pendingInvites.delete(inviteId);
+        socket.emit('invite_expired', { inviteId });
+      }, 30000);
+
+      const entry: QueueEntry = {
+        socketId: socket.id,
+        userId: user.userId,
+        username: user.username,
+        elo: data.elo || 1200,
+        timeCategory: data.timeCategory,
+        timeInitial: data.timeInitial,
+        timeIncrement: data.timeIncrement,
+      };
+
+      pendingInvites.set(inviteId, { from: entry, to: data.friendId, timeout });
+
+      // Send invite to friend
+      io.to(friendSocketId).emit('game_invite', {
+        inviteId,
+        from: { userId: user.userId, username: user.username, elo: data.elo || 1200 },
+        timeCategory: data.timeCategory,
+        timeInitial: data.timeInitial,
+        timeIncrement: data.timeIncrement,
+      });
+
+      socket.emit('invite_sent', { inviteId });
+    });
+
+    // ── Accept Game Invite ──
+    socket.on('accept_invite', (data: { inviteId: string; elo?: number }) => {
+      const invite = pendingInvites.get(data.inviteId);
+      if (!invite) {
+        socket.emit('invite_error', { message: 'Invite not found or expired' });
+        return;
+      }
+
+      clearTimeout(invite.timeout);
+      pendingInvites.delete(data.inviteId);
+
+      // Create game room directly
+      const accepter: QueueEntry = {
+        socketId: socket.id,
+        userId: user.userId,
+        username: user.username,
+        elo: data.elo || 1200,
+        timeCategory: invite.from.timeCategory,
+        timeInitial: invite.from.timeInitial,
+        timeIncrement: invite.from.timeIncrement,
+      };
+
+      createGameRoom(io, invite.from, accepter);
+    });
+
+    // ── Decline Game Invite ──
+    socket.on('decline_invite', (data: { inviteId: string }) => {
+      const invite = pendingInvites.get(data.inviteId);
+      if (!invite) return;
+
+      clearTimeout(invite.timeout);
+      pendingInvites.delete(data.inviteId);
+
+      // Notify sender
+      const senderSocket = io.sockets.sockets.get(invite.from.socketId);
+      senderSocket?.emit('invite_declined', { 
+        inviteId: data.inviteId, 
+        by: user.username 
+      });
+    });
+
     // ── Disconnect ──
     socket.on('disconnect', () => {
       // Remove from queue
       matchmakingQueue.delete(socket.id);
+
+      // Online presence: remove user
+      if (onlineUsers.get(user.userId) === socket.id) {
+        onlineUsers.delete(user.userId);
+        socket.broadcast.emit('user_offline', { userId: user.userId });
+      }
 
       // Handle in-game disconnect
       const roomId = playerRooms.get(socket.id);

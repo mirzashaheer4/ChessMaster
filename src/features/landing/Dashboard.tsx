@@ -13,12 +13,14 @@ import {
   Menu,
   X,
   User,
+  Users,
   Trophy,
   Swords,
   XCircle,
 } from 'lucide-react';
 
 import { useAuthStore } from '../../core/store/auth';
+import { useFriendsStore } from '../../core/store/friendsStore';
 
 import { useNavigate } from 'react-router-dom';
 import WebGLParticleBackground from '../../core/components/WebGLParticleBackground';
@@ -46,7 +48,12 @@ const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { user, logout } = useAuthStore();
+  const { setPanelOpen, pendingRequests, fetchRequests } = useFriendsStore();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (user) fetchRequests();
+  }, [user, fetchRequests]);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 50);
@@ -102,6 +109,18 @@ const Navbar = () => {
           <div className="flex items-center gap-4 ml-4 pl-4 border-l border-white/10">
             {user ? (
               <div className="flex items-center gap-3">
+                <button 
+                  onClick={() => setPanelOpen(true)}
+                  className="relative flex items-center gap-2 px-4 py-2 rounded-lg bg-[#e8b34b]/10 hover:bg-[#e8b34b]/20 border border-[#e8b34b]/20 text-[#e8b34b] text-sm font-medium transition-colors cursor-pointer group"
+                >
+                  <Users className="w-4 h-4 transition-transform group-hover:scale-110" />
+                  Friends
+                  {pendingRequests.length > 0 && (
+                    <span className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-red-500 text-white text-[9px] font-bold flex items-center justify-center shadow-[0_0_8px_rgba(239,68,68,0.5)] animate-pulse">
+                      {pendingRequests.length}
+                    </span>
+                  )}
+                </button>
                 <button 
                   onClick={() => navigate('/profile')}
                   className="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/20 text-blue-400 text-sm font-medium transition-colors cursor-pointer group"
@@ -162,6 +181,21 @@ const Navbar = () => {
           <div className="pt-6 mt-2 border-t border-white/10">
             {user ? (
               <div className="flex flex-col gap-3">
+                <button 
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    setPanelOpen(true);
+                  }}
+                  className="w-full py-4 rounded-xl bg-[#e8b34b]/10 border border-[#e8b34b]/20 text-[#e8b34b] text-lg font-bold flex items-center justify-center gap-3 relative"
+                >
+                  <Users className="w-6 h-6" />
+                  Friends
+                  {pendingRequests.length > 0 && (
+                    <span className="w-6 h-6 rounded-full bg-red-500 text-white text-xs font-bold flex items-center justify-center shadow-[0_0_8px_rgba(239,68,68,0.5)]">
+                      {pendingRequests.length}
+                    </span>
+                  )}
+                </button>
                 <button 
                   onClick={() => {
                     setMobileMenuOpen(false);

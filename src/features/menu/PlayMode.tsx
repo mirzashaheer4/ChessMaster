@@ -23,6 +23,9 @@ const FloatingPiece = ({
 // Migrated to WebGLParticleBackground
 
 import GameSetupModal from './ui/GameSetupModal';
+import OnlineModeChoice from './ui/OnlineModeChoice';
+import { getSocket } from '../../core/api/socketClient';
+import { useAuthStore } from '../../core/store/auth';
 
 // ─── GAME MODES DATA ────────────────────────────────────────────
 const GAME_MODES = [
@@ -184,6 +187,7 @@ const GameModeCard = ({ mode, isActive, isFaded, onClick, onMouseEnter, onMouseL
 export default function PlayMode() {
   const [hoveredMode, setHoveredMode] = useState<'none' | 'pvp' | 'ai' | 'online' | 'dev'>('none');
   const [setupMode, setSetupMode] = useState<'local' | 'dev' | 'online' | null>(null);
+  const [showOnlineChoice, setShowOnlineChoice] = useState(false);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const containerRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
@@ -237,8 +241,23 @@ export default function PlayMode() {
   const handleCardAction = (modeId: string) => {
     if (modeId === 'ai') navigate('/difficulty');
     else if (modeId === 'pvp') setSetupMode('local');
-    else if (modeId === 'online') setSetupMode('online');
+    else if (modeId === 'online') setShowOnlineChoice(true);
     else if (modeId === 'dev') setSetupMode('dev');
+  };
+
+  const handlePlayFriend = (friendId: string) => {
+    try {
+      const socket = getSocket();
+      const user = useAuthStore.getState().user;
+      // Send invite with default rapid 10min time control
+      socket.emit('invite_friend', {
+        friendId,
+        timeCategory: 'rapid',
+        timeInitial: 600, // 10 min in seconds
+        timeIncrement: 0,
+        elo: user?.eloRating || 1200,
+      });
+    } catch {}
   };
 
   // Parallax mouse tracking
@@ -529,6 +548,18 @@ export default function PlayMode() {
            if (setupMode === 'dev') handleStartDev(settings);
            if (setupMode === 'online') handleStartOnline(settings);
            setSetupMode(null);
+        }}
+      />
+
+      <OnlineModeChoice
+        isOpen={showOnlineChoice}
+        onClose={() => setShowOnlineChoice(false)}
+        onPlayRandom={() => {
+          setShowOnlineChoice(false);
+          setSetupMode('online');
+        }}
+        onPlayFriend={(friendId) => {
+          handlePlayFriend(friendId);
         }}
       />
 

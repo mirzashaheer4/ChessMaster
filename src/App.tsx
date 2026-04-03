@@ -4,6 +4,7 @@ import Landing from './features/landing/Landing';
 import Dashboard from './features/landing/Dashboard';
 import PlayMode from './features/menu/PlayMode';
 import Profile from './features/menu/Profile';
+import UserAnalytics from './features/menu/UserAnalytics';
 import DifficultyScreen from './features/menu/Difficulty';
 import About from './features/landing/About';
 import HistoryScreen from './features/menu/History';
@@ -14,7 +15,10 @@ import GameReview from './features/game/review/GameReview';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { AuthModal } from './components/ui/AuthModal';
+import { FriendsPanel } from './components/ui/FriendsPanel';
+import { GameInviteNotification } from './components/ui/GameInviteNotification';
 import { useAuthStore } from './core/store/auth';
+import { getSocket, disconnectSocket } from './core/api/socketClient';
 
 function AppContent() {
   const [showAuth, setShowAuth] = useState(false);
@@ -25,6 +29,15 @@ function AppContent() {
     window.addEventListener('open-login', handleLoginOpen);
     return () => window.removeEventListener('open-login', handleLoginOpen);
   }, []);
+
+  // Auto-connect socket for online presence when user is logged in
+  useEffect(() => {
+    if (user) {
+      try { getSocket(); } catch {}
+    } else {
+      disconnectSocket();
+    }
+  }, [user]);
 
   return (
     <DndProvider backend={HTML5Backend}>
@@ -38,12 +51,15 @@ function AppContent() {
           <Route path="/game/local" element={user ? <LocalGame /> : <Navigate to="/" replace />} />
           <Route path="/game/ai" element={user ? <AIGame /> : <Navigate to="/" replace />} />
           <Route path="/game/online" element={user ? <OnlineGame /> : <Navigate to="/" replace />} />
+          <Route path="/user/:userId" element={user ? <UserAnalytics /> : <Navigate to="/" replace />} />
           <Route path="/about" element={<About />} />
           <Route path="/history" element={user ? <HistoryScreen /> : <Navigate to="/" replace />} />
           <Route path="/review" element={user ? <GameReview /> : <Navigate to="/" replace />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
         {showAuth && <AuthModal onClose={() => setShowAuth(false)} />}
+        {user && <FriendsPanel />}
+        {user && <GameInviteNotification />}
       </main>
     </DndProvider>
   );
