@@ -96,8 +96,10 @@ export const createGameSlice: StateCreator<GameStore, [], [], GameSlice> = (set,
     },
 
     onMoveMade: () => {
-        const { game, timeControl, whiteTime, blackTime } = get();
+        const { game, timeControl, whiteTime, blackTime, mode } = get();
         if (!timeControl) return;
+        // In online mode, the server sends authoritative times — don't add increment locally
+        if (mode === 'online') return;
 
         const turn = game.turn();
         const justMoved = turn === 'w' ? 'b' : 'w';
@@ -131,25 +133,24 @@ export const createGameSlice: StateCreator<GameStore, [], [], GameSlice> = (set,
     },
 
     tickClock: (delta) => {
-        const { clockRunning, gameStatus, game, whiteTime, blackTime, playerColor } = get();
+        const { clockRunning, gameStatus, game, whiteTime, blackTime, playerColor, mode } = get();
         if (!clockRunning || gameStatus !== 'active') return;
+        // In online mode, don't trigger timeout locally — the server is authoritative
 
         const turn = game.turn();
         if (turn === 'w') {
             const next = Math.max(0, whiteTime - delta);
             set({ whiteTime: next });
-            if (next === 0) {
+            if (next === 0 && mode !== 'online') {
                 get().setGameStatus('timeout');
-                // White timed out: player wins if they're Black, loses if they're White
                 const result = playerColor === 'black' ? 'win' : playerColor === 'white' ? 'loss' : 'loss';
                 get().saveGame(result);
             }
         } else {
             const next = Math.max(0, blackTime - delta);
             set({ blackTime: next });
-            if (next === 0) {
+            if (next === 0 && mode !== 'online') {
                 get().setGameStatus('timeout');
-                // Black timed out: player wins if they're White, loses if they're Black
                 const result = playerColor === 'white' ? 'win' : playerColor === 'black' ? 'loss' : 'win';
                 get().saveGame(result);
             }

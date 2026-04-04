@@ -4,7 +4,6 @@ import { useGameStore } from '../../../core/store/game';
 import { useGameState, useSettings } from '../../../core/store/selectors';
 import { useAuthStore } from '../../../core/store/auth';
 import { useGameTimer } from '../../../core/hooks/useGameTimer';
-import { audio } from '../../../core/audio/audio';
 import GameOverModal from '../ui/GameOverModal';
 import ChessClock from '../ui/ChessClock';
 import {
@@ -84,8 +83,9 @@ const OnlineGame = () => {
 
   // Show game-over modal on game end
   useEffect(() => {
-    if (onlineStatus === 'ended' && gameStatus !== 'active') {
-      audio.playCapture();
+    if (gameStatus !== 'active' && (onlineStatus === 'ended' || onlineStatus === 'playing')) {
+      // Close resign confirm if it was open
+      setShowResignConfirm(false);
       const t = setTimeout(() => setShowGameOverModal(true), 500);
       return () => clearTimeout(t);
     }
@@ -106,7 +106,8 @@ const OnlineGame = () => {
 
   // ── Navigation ──
   const handleBack = () => {
-    if (onlineStatus === 'playing') {
+    // Only show resign if the game is genuinely still active
+    if (onlineStatus === 'playing' && gameStatus === 'active') {
       setShowResignConfirm(true);
     } else {
       resetOnline();
@@ -223,7 +224,7 @@ const OnlineGame = () => {
       <div className="flex lg:hidden w-full h-14 shrink-0 items-center justify-between px-4 z-40 bg-black/40 border-b border-white/5">
         <button 
           onClick={() => {
-            if (onlineStatus === 'playing') setShowResignConfirm(true);
+            if (onlineStatus === 'playing' && gameStatus === 'active') setShowResignConfirm(true);
             else { resetOnline(); navigate('/play'); }
           }} 
           className="p-2 -ml-2 text-gray-400 hover:text-white transition-colors"

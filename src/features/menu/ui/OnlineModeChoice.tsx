@@ -48,6 +48,24 @@ const OnlineModeChoice: React.FC<OnlineModeChoiceProps> = ({ isOpen, onClose, on
     onPlayFriend(friendId);
   };
 
+  // Listen for invite declined/expired to reset the SENT button
+  useEffect(() => {
+    const handleDeclined = () => setInviteSent(null);
+    window.addEventListener('invite-declined', handleDeclined);
+    
+    // Also listen on socket for invite_expired
+    let socket: any = null;
+    try {
+      socket = getSocket();
+      socket.on('invite_expired', handleDeclined);
+    } catch {}
+
+    return () => {
+      window.removeEventListener('invite-declined', handleDeclined);
+      if (socket) socket.off('invite_expired', handleDeclined);
+    };
+  }, []);
+
   return (
     <AnimatePresence>
       <motion.div

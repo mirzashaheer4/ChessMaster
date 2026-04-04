@@ -5,6 +5,7 @@ import { syncState } from '../storeUtils';
 import { useStandardStore } from '../../engine/storeStandard';
 import { useChess960Store } from '../../engine/storeChess960';
 import { removeAllSocketListeners } from '../socketEvents';
+import { audio } from '../../audio/audio';
 
 export const createOnlineSlice: StateCreator<GameStore, [], [], OnlineSlice> = (set, get) => ({
   // Initial State
@@ -160,6 +161,9 @@ export const createOnlineSlice: StateCreator<GameStore, [], [], OnlineSlice> = (
       });
       store.resetGame();
       store.startClock();
+      
+      // Play game start sound
+      audio.playGameStart();
 
       set({
         onlineStatus: 'playing',
@@ -201,8 +205,8 @@ export const createOnlineSlice: StateCreator<GameStore, [], [], OnlineSlice> = (
         opponentElo: data.opponent.elo,
         drawOfferedBy: data.drawOfferedBy,
         opponentDisconnected: false,
-        whiteTime: data.whiteTime / 1000, // Convert to seconds
-        blackTime: data.blackTime / 1000,
+        whiteTime: data.whiteTime,
+        blackTime: data.blackTime,
       });
     });
 
@@ -225,8 +229,8 @@ export const createOnlineSlice: StateCreator<GameStore, [], [], OnlineSlice> = (
         // We already have this state (likely because we originated the move)
         // Just sync the times and return early to prevent echo wiping our history
         set({
-          whiteTime: data.whiteTime / 1000,
-          blackTime: data.blackTime / 1000,
+          whiteTime: data.whiteTime,
+          blackTime: data.blackTime,
         });
         return;
       }
@@ -244,10 +248,10 @@ export const createOnlineSlice: StateCreator<GameStore, [], [], OnlineSlice> = (
         syncState(set, get);
       }
 
-      // Sync clocks from server (authoritative)
+      // Sync clocks from server (authoritative) — server sends ms
       set({
-        whiteTime: data.whiteTime / 1000,
-        blackTime: data.blackTime / 1000,
+        whiteTime: data.whiteTime,
+        blackTime: data.blackTime,
       });
     });
 
@@ -276,11 +280,17 @@ export const createOnlineSlice: StateCreator<GameStore, [], [], OnlineSlice> = (
 
       store.setGameStatus(gameStatus);
 
+      // Play appropriate game over sound
+      if (gameStatus === 'checkmate') audio.playCheckmate();
+      else if (gameStatus === 'resign') audio.playResign();
+      else if (gameStatus === 'timeout') audio.playGameOver();
+      else audio.playDraw();
+
       set({
         onlineStatus: 'ended',
         drawOfferedBy: null,
-        whiteTime: data.whiteTime / 1000,
-        blackTime: data.blackTime / 1000,
+        whiteTime: data.whiteTime,
+        blackTime: data.blackTime,
       });
     });
 

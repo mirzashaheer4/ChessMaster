@@ -90,6 +90,9 @@ function attachFriendListeners(s: Socket) {
 
   s.on('invite_expired', (data: { inviteId: string }) => {
     store().removeGameInvite(data.inviteId);
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('invite-declined', { detail: 'Game invite expired' }));
+    }
   });
 
   // Friend request notifications
