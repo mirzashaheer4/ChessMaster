@@ -39,15 +39,6 @@ const OnlineModeChoice: React.FC<OnlineModeChoiceProps> = ({ isOpen, onClose, on
     }
   }, [isOpen]);
 
-  if (!isOpen) return null;
-
-  const onlineFriends = friends.filter(f => f.isOnline);
-
-  const handleInviteFriend = (friendId: string) => {
-    setInviteSent(friendId);
-    onPlayFriend(friendId);
-  };
-
   // Listen for invite declined/expired to reset the SENT button
   useEffect(() => {
     const handleDeclined = () => setInviteSent(null);
@@ -65,6 +56,15 @@ const OnlineModeChoice: React.FC<OnlineModeChoiceProps> = ({ isOpen, onClose, on
       if (socket) socket.off('invite_expired', handleDeclined);
     };
   }, []);
+
+  if (!isOpen) return null;
+
+  const onlineFriends = friends.filter(f => f.isOnline);
+
+  const handleInviteFriend = (friendId: string) => {
+    setInviteSent(friendId);
+    onPlayFriend(friendId);
+  };
 
   return (
     <AnimatePresence>
