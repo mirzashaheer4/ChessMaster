@@ -19,22 +19,48 @@ import { FriendsPanel } from './components/ui/FriendsPanel';
 import { GameInviteNotification } from './components/ui/GameInviteNotification';
 import { useAuthStore } from './core/store/auth';
 import { getSocket, disconnectSocket } from './core/api/socketClient';
+import { useGameStore } from './core/store/game';
+import { useNavigate } from 'react-router-dom';
 
 function AppContent() {
   const [showAuth, setShowAuth] = useState(false);
   const { user } = useAuthStore();
+  const navigate = useNavigate();
+  const onlineStatus = useGameStore(s => s.onlineStatus);
+  const [inviteDeclinedMsg, setInviteDeclinedMsg] = useState('');
 
   useEffect(() => {
     const handleLoginOpen = () => setShowAuth(true);
+    const handleInviteDeclined = (e: any) => {
+      setInviteDeclinedMsg(e.detail);
+      setTimeout(() => setInviteDeclinedMsg(''), 4000);
+    };
+    
     window.addEventListener('open-login', handleLoginOpen);
-    return () => window.removeEventListener('open-login', handleLoginOpen);
+    window.addEventListener('invite-declined', handleInviteDeclined);
+    
+    return () => {
+      window.removeEventListener('open-login', handleLoginOpen);
+      window.removeEventListener('invite-declined', handleInviteDeclined);
+    };
   }, []);
+
+  // Global navigation to online game when match is found
+  useEffect(() => {
+    if (onlineStatus === 'playing') {
+      navigate('/game/online');
+    }
+  }, [onlineStatus, navigate]);
 
   // Auto-connect socket for online presence when user is logged in
   useEffect(() => {
     if (user) {
-      try { getSocket(); } catch {}
+      try { 
+        getSocket(); 
+        useGameStore.getState().initSocketListeners();
+      } catch {}
     } else {
+      useGameStore.getState().cleanupSocketListeners();
       disconnectSocket();
     }
   }, [user]);
@@ -60,6 +86,13 @@ function AppContent() {
         {showAuth && <AuthModal onClose={() => setShowAuth(false)} />}
         {user && <FriendsPanel />}
         {user && <GameInviteNotification />}
+        
+        {/* Global Toast for Declined Invites */}
+        {inviteDeclinedMsg && (
+          <div className="fixed top-4 left-1/2 -translate-x-1/2 z-[200] bg-red-500/10 text-red-400 px-6 py-3 rounded-full text-sm font-bold border border-red-500/20 shadow-[0_0_20px_rgba(239,68,68,0.2)] animate-in fade-in slide-in-from-top-4 pointer-events-none">
+            {inviteDeclinedMsg}
+          </div>
+        )}
       </main>
     </DndProvider>
   );

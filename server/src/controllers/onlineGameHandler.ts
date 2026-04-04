@@ -620,8 +620,7 @@ export function registerOnlineGameHandler(io: Server) {
       pendingInvites.delete(data.inviteId);
 
       // Notify sender
-      const senderSocket = io.sockets.sockets.get(invite.from.socketId);
-      senderSocket?.emit('invite_declined', { 
+      io.to(invite.from.socketId).emit('invite_declined', { 
         inviteId: data.inviteId, 
         by: user.username 
       });

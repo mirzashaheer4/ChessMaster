@@ -24,9 +24,6 @@ export const createOnlineSlice: StateCreator<GameStore, [], [], OnlineSlice> = (
       set({ onlineStatus: 'connecting', connectionError: null });
       const socket = getSocket();
 
-      // Init listeners (safe to call multiple times - old listeners removed first)
-      get().initSocketListeners();
-
       const join = () => {
         socket.emit('join_queue', { timeCategory, timeInitial, timeIncrement });
         set({ onlineStatus: 'queuing' });

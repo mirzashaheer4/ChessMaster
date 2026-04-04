@@ -81,8 +81,11 @@ function attachFriendListeners(s: Socket) {
     store().addGameInvite(data);
   });
 
-  s.on('invite_declined', (data: { inviteId: string }) => {
+  s.on('invite_declined', (data: { inviteId: string; by?: string }) => {
     store().removeGameInvite(data.inviteId);
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('invite-declined', { detail: `${data.by || 'Opponent'} declined your game invite` }));
+    }
   });
 
   s.on('invite_expired', (data: { inviteId: string }) => {
