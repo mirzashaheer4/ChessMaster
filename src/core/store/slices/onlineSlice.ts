@@ -156,10 +156,10 @@ export const createOnlineSlice: StateCreator<GameStore, [], [], OnlineSlice> = (
       store.setMode('online');
       store.setPlayerColor(data.color === 'white' ? 'white' : 'black');
       store.setTimeControl({
-        category: data.timeInitial <= 60 ? 'bullet' : data.timeInitial <= 300 ? 'blitz' : 'rapid',
+        category: data.timeInitial <= 60000 ? 'bullet' : data.timeInitial <= 300000 ? 'blitz' : 'rapid',
         initial: data.timeInitial,
         increment: data.timeIncrement,
-        label: `${Math.floor(data.timeInitial / 60)}+${data.timeIncrement}`,
+        label: `${Math.floor(data.timeInitial / 60000)}+${data.timeIncrement / 1000}`,
       });
       store.resetGame();
       store.startClock();

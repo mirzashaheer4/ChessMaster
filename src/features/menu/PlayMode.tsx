@@ -253,7 +253,7 @@ export default function PlayMode() {
       socket.emit('invite_friend', {
         friendId,
         timeCategory: 'rapid',
-        timeInitial: 600, // 10 min in seconds
+        timeInitial: 600000, // 10 min in ms
         timeIncrement: 0,
         elo: user?.eloRating || 1200,
       });

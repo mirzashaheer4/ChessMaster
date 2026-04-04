@@ -25,9 +25,9 @@ export const GameInviteNotification: React.FC = () => {
       // Set up game store for the match
       const tc = {
         category: invite.timeCategory as 'bullet' | 'blitz' | 'rapid',
-        initial: invite.timeInitial * 1000,
-        increment: invite.timeIncrement * 1000,
-        label: `${invite.timeInitial / 60}min`,
+        initial: invite.timeInitial,
+        increment: invite.timeIncrement,
+        label: `${Math.floor(invite.timeInitial / 60000)}min`,
       };
       useGameStore.getState().setMode('online');
       useGameStore.getState().setTimeControl(tc);
@@ -83,8 +83,8 @@ const InviteCard: React.FC<{
   }, []);
 
   const getTimeLabel = () => {
-    const mins = Math.floor(invite.timeInitial / 60);
-    const inc = invite.timeIncrement;
+    const mins = Math.floor(invite.timeInitial / 60000);
+    const inc = invite.timeIncrement / 1000;
     return inc > 0 ? `${mins}+${inc}` : `${mins} min`;
   };
 

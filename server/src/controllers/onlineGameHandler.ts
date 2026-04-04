@@ -162,8 +162,8 @@ function createGameRoom(io: Server, p1: QueueEntry, p2: QueueEntry) {
   const blackPlayer = whiteIsP1 ? p2 : p1;
 
   const roomId = generateRoomId();
-  const timeMs = whitePlayer.timeInitial * 1000;
-  const incrementMs = whitePlayer.timeIncrement * 1000;
+  const timeMs = whitePlayer.timeInitial;
+  const incrementMs = whitePlayer.timeIncrement;
 
   const room: GameRoom = {
     id: roomId,
@@ -298,8 +298,8 @@ export function registerOnlineGameHandler(io: Server) {
       const timeInitial = parseInt(data.timeInitial as any);
       const timeIncrement = parseInt(data.timeIncrement as any) || 0;
 
-      // Security: Validate time ranges
-      if (timeInitial < 1 || timeInitial > 3600 || timeIncrement < 0 || timeIncrement > 180) {
+      // Security: Validate time ranges (ms) - max 2 hours (7200000ms), max increment 3 minutes (180000ms)
+      if (timeInitial < 1000 || timeInitial > 7200000 || timeIncrement < 0 || timeIncrement > 180000) {
         socket.emit('queue_error', { message: 'Time control out of valid range' });
         return;
       }
