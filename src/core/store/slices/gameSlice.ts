@@ -276,7 +276,8 @@ export const createGameSlice: StateCreator<GameStore, [], [], GameSlice> = (set,
                 historyLan: [],
                 gameStatus: derivedStatus,
                 reviewIndex: 0,
-                mode: target.mode
+                mode: target.mode,
+                currentGameAnalysis: target.analysis || null,
             });
         }
     },
@@ -303,11 +304,12 @@ export const createGameSlice: StateCreator<GameStore, [], [], GameSlice> = (set,
             gameStatus: derivedStatus,
             reviewIndex: sanMoves.length > 0 ? sanMoves.length - 1 : -1,
             mode: (mode as any) || 'local',
+            currentGameAnalysis: null,
         });
     },
 
     saveReviewState: () => {
-        const { game, history, historyLan, mode, playerColor, chessType, startFen, castlingRights } = get();
+        const { game, history, historyLan, mode, playerColor, chessType, startFen, castlingRights, currentGameAnalysis } = get();
         try {
             let pgn = '';
             try { pgn = game.pgn(); } catch { /* ignore */ }
@@ -321,6 +323,7 @@ export const createGameSlice: StateCreator<GameStore, [], [], GameSlice> = (set,
                 chessType,
                 startFen: startFen || null,
                 castlingRights: castlingRights || null,
+                currentGameAnalysis: currentGameAnalysis || null,
             };
             sessionStorage.setItem('chess-review-state', JSON.stringify(data));
         } catch { /* storage not available */ }
@@ -361,6 +364,7 @@ export const createGameSlice: StateCreator<GameStore, [], [], GameSlice> = (set,
                 chessType: data.chessType || 'standard',
                 startFen: data.startFen || undefined,
                 castlingRights: data.castlingRights || undefined,
+                currentGameAnalysis: data.currentGameAnalysis || null,
             });
             return true;
         } catch { return false; }

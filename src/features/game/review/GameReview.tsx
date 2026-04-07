@@ -225,7 +225,8 @@ export const GameReview = () => {
       cancelled = true;
       engine.terminate();
     };
-  }, []); // Run once on mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [history.length]); // Run once we have history
 
   // The analysis data — use real results if available, empty array while loading
   const analysis: MoveAnalysis[] = currentGameAnalysis && currentGameAnalysis.length > 0
@@ -274,7 +275,7 @@ export const GameReview = () => {
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
+  }, [history.length]);
 
   const navBtnClass = "p-3 rounded-xl glass-card text-gray-400 hover:text-[#e8b34b] hover:bg-[#e8b34b]/5 transition-all duration-200";
 
