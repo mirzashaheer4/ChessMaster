@@ -2,6 +2,7 @@
   "name": "chess-premium",
   "private": true,
   "version": "0.0.0",
+  "homepage": "https://chessmaster.live",
   "license": "MIT",
   "type": "module",
   "scripts": {

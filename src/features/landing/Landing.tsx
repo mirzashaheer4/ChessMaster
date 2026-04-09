@@ -3,11 +3,6 @@ import {
   Crown, 
   Brain, 
   BarChart3,
-  Facebook, 
-  Instagram, 
-  Youtube,
-  Twitter,
-  ChevronRight,
   Zap,
   Dices,
   Menu,
@@ -399,74 +394,63 @@ const CTASection = ({ onPlayNow }: { onPlayNow: () => void }) => {
 
 // ─── Footer ───────────────────────────────────────────────────────
 const Footer = () => {
+  const navigate = useNavigate();
   return (
-  <footer id="about" className="relative pt-20 pb-8 border-t border-white/5">
+  <footer className="relative pt-20 pb-8 border-t border-white/5">
     <div className="max-w-7xl mx-auto px-6">
       <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
         {/* Brand */}
-        <div className="md:col-span-1">
+        <div className="md:col-span-2">
           <div className="flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-[#e8b34b] to-[#d4a03d] flex items-center justify-center">
+            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-[#e8b34b] to-[#d4a03d] flex items-center justify-center cursor-pointer" onClick={() => window.scrollTo(0,0)}>
               <Crown className="w-6 h-6 text-[#0a0a0a]" />
             </div>
-            <span className="text-xl font-bold font-['Montserrat']">
+            <span className="text-xl font-bold font-['Montserrat'] cursor-pointer" onClick={() => window.scrollTo(0,0)}>
               Chess<span className="text-[#e8b34b]">Master</span>
             </span>
           </div>
-          <p className="text-gray-500 text-sm mb-6">
+          <p className="text-gray-500 text-sm mb-6 max-w-md">
             Master the game, one move at a time. The ultimate chess experience.
           </p>
-          <div className="flex items-center gap-4">
-            {[Twitter, Facebook, Instagram, Youtube].map((Icon, index) => (
-              <a key={index} href="#" className="social-icon text-gray-400">
-                <Icon className="w-5 h-5" />
-              </a>
-            ))}
-          </div>
         </div>
 
         {/* Quick Links */}
         <div>
-          <h4 className="font-semibold mb-4 text-sm uppercase tracking-wider">Quick Links</h4>
-          <ul className="space-y-3">
-            <li><a href="#" onClick={(e) => { e.preventDefault(); window.dispatchEvent(new Event('open-login')); }} className="text-gray-500 hover:text-[#e8b34b] text-sm transition-colors duration-300">Play Online</a></li>
-            <li><a href="#leaderboard" className="text-gray-500 hover:text-[#e8b34b] text-sm transition-colors duration-300">Leaderboard</a></li>
-            <li><a href="#" onClick={(e) => { e.preventDefault(); window.dispatchEvent(new Event('open-login')); }} className="text-gray-500 hover:text-[#e8b34b] text-sm transition-colors duration-300">History & Analysis</a></li>
+          <h4 className="font-semibold mb-4 text-sm uppercase tracking-wider border-b border-white/10 pb-2 inline-block">Quick Links</h4>
+          <ul className="space-y-3 mt-2">
+            <li><a href="#" onClick={(e) => { e.preventDefault(); window.dispatchEvent(new Event('open-login')); }} className="text-gray-400 hover:text-[#e8b34b] text-sm transition-colors duration-300">Play Online</a></li>
+            <li><a href="#leaderboard" className="text-gray-400 hover:text-[#e8b34b] text-sm transition-colors duration-300">Leaderboard</a></li>
+            <li><a href="#" onClick={(e) => { e.preventDefault(); window.dispatchEvent(new Event('open-login')); }} className="text-gray-400 hover:text-[#e8b34b] text-sm transition-colors duration-300">History & Analysis</a></li>
           </ul>
         </div>
 
         {/* Resources */}
         <div>
-          <h4 className="font-semibold mb-4 text-sm uppercase tracking-wider">Resources</h4>
-          <ul className="space-y-3">
-            <li><a href="#about" className="text-gray-500 hover:text-[#e8b34b] text-sm transition-colors duration-300">About Us</a></li>
-            <li><a href="#" className="text-gray-500 hover:text-[#e8b34b] text-sm transition-colors duration-300">Help Center</a></li>
+          <h4 className="font-semibold mb-4 text-sm uppercase tracking-wider border-b border-white/10 pb-2 inline-block">Resources</h4>
+          <ul className="space-y-3 mt-2">
+            <li><a href="#" onClick={(e) => { e.preventDefault(); navigate('/about'); }} className="text-gray-400 hover:text-[#e8b34b] text-sm transition-colors duration-300">About Us</a></li>
+            <li><a href="#" onClick={(e) => { e.preventDefault(); navigate('/help'); }} className="text-gray-400 hover:text-[#e8b34b] text-sm transition-colors duration-300">Help Center</a></li>
           </ul>
-        </div>
-
-        {/* Newsletter */}
-        <div>
-          <h4 className="font-semibold mb-4 text-sm uppercase tracking-wider">Stay Updated</h4>
-          <p className="text-gray-500 text-sm mb-4">Get the latest chess news and updates.</p>
-          <div className="flex gap-2">
-            <input 
-              type="email" 
-              placeholder="Enter your email"
-              className="flex-1 bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-[#e8b34b]/50 transition-colors"
-            />
-            <button className="btn-gold px-4 py-2 rounded-lg">
-              <ChevronRight className="w-4 h-4" />
-            </button>
-          </div>
         </div>
       </div>
 
       {/* Bottom Bar */}
       <div className="pt-8 border-t border-white/5 flex flex-col md:flex-row items-center justify-between gap-4">
-        <p className="text-gray-600 text-sm">© 2024 ChessMaster. All rights reserved.</p>
+        <p className="text-gray-600 text-sm">© 2026 ChessMaster. All rights reserved.</p>
         <div className="flex items-center gap-6">
-          {['Privacy', 'Terms', 'Cookies'].map((item) => (
-            <a key={item} href="#" className="text-gray-600 hover:text-gray-400 text-sm transition-colors">{item}</a>
+          {[
+            { label: 'Privacy', path: '/privacy' },
+            { label: 'Terms', path: '/terms' },
+            { label: 'Cookies', path: '/cookies' }
+          ].map((item) => (
+            <a 
+              key={item.label} 
+              href="#" 
+              onClick={(e) => { e.preventDefault(); navigate(item.path); }}
+              className="text-gray-500 hover:text-[#e8b34b] text-sm transition-colors"
+            >
+              {item.label}
+            </a>
           ))}
         </div>
       </div>

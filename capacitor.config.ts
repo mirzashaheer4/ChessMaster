@@ -5,8 +5,9 @@ const config: CapacitorConfig = {
   appName: 'ChessMaster',
   webDir: 'dist',
   server: {
-    androidScheme: 'http',
-    cleartext: true,
+    hostname: 'chessmaster.live',
+    androidScheme: 'https',
+    cleartext: false,
   },
   android: {
     buildOptions: {

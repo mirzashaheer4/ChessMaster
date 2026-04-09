@@ -12,6 +12,7 @@ import LocalGame from './features/game/modes/LocalGame';
 import AIGame from './features/game/modes/AIGame';
 import OnlineGame from './features/game/modes/OnlineGame';
 import GameReview from './features/game/review/GameReview';
+import { Privacy, Terms, Cookies, HelpCenter } from './features/landing/StaticPages';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { AuthModal } from './components/ui/AuthModal';
@@ -81,6 +82,10 @@ function AppContent() {
           <Route path="/about" element={<About />} />
           <Route path="/history" element={user ? <HistoryScreen /> : <Navigate to="/" replace />} />
           <Route path="/review" element={user ? <GameReview /> : <Navigate to="/" replace />} />
+          <Route path="/privacy" element={<Privacy />} />
+          <Route path="/terms" element={<Terms />} />
+          <Route path="/cookies" element={<Cookies />} />
+          <Route path="/help" element={<HelpCenter />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
         {showAuth && <AuthModal onClose={() => setShowAuth(false)} />}
