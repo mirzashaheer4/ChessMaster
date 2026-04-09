@@ -82,7 +82,7 @@ const About = () => {
           <div className="flex items-center gap-2 text-gray-600 text-sm">
             <span>Made with</span>
             <Heart className="w-4 h-4 text-red-500" />
-            <span>by Shahe</span>
+            <span>by Mirza Shaheer</span>
           </div>
           <a 
             href="#" 
