@@ -179,8 +179,6 @@ const HeroSection = () => (
         
         <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold font-['Montserrat'] mb-6 animate-fade-in-up stagger-1 leading-[1.1] text-white drop-shadow-lg">
           Play Chess Online
-          <br />
-          <span className="text-gold-gradient">on the #1 Site!</span>
         </h1>
         
         <p className="text-lg md:text-xl text-gray-300 max-w-md mx-auto lg:mx-0 mb-10 animate-fade-in-up stagger-2 drop-shadow-md font-medium">
