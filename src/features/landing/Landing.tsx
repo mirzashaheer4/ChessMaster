@@ -182,7 +182,7 @@ const HeroSection = () => (
         </h1>
         
         <p className="text-lg md:text-xl text-gray-300 max-w-md mx-auto lg:mx-0 mb-10 animate-fade-in-up stagger-2 drop-shadow-md font-medium">
-          Join 230+ million players in the world's largest chess community. Learn, play, and dominate.
+          Master the game of kings. Learn, play, and dominate.
         </p>
         
         <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 animate-fade-in-up stagger-3">
