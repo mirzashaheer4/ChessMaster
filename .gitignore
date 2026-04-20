@@ -16,6 +16,11 @@ dist-ssr
 .env.production
 .env.development
 *.local
+
+# Legacy artifacts that should not be public
+old/dev.db
+old/build_log*.txt
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
