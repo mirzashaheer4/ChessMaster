@@ -52,7 +52,7 @@ A premium, full-stack chess platform built for high-performance gameplay and dee
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/shahed-akheer/chess.git
+   git clone https://github.com/mirzashaheer4/ChessMaster.git
    cd chess
    ```
 
