@@ -53,7 +53,11 @@ A premium, full-stack chess platform built for high-performance gameplay and dee
 1. **Clone the repository:**
    ```bash
    git clone https://github.com/mirzashaheer4/ChessMaster.git
+<<<<<<< HEAD
    cd ChessMaster
+=======
+   cd chess
+>>>>>>> 2d61c640d9f013d5d19b47c9ba9e01854b2ffa7f
    ```
 
 2. **Install dependencies:**
